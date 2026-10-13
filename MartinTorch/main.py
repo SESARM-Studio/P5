@@ -5,6 +5,10 @@ from torchvision import datasets
 from torchvision.transforms import v2
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
+import os
+import certifi
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
 
 training_data = datasets.CIFAR10(
     root = "data",
