@@ -1,4 +1,4 @@
 import pytest
 
-def pass_function():
+def test_pass_function():
     pass
