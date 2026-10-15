@@ -3,14 +3,14 @@ from torch import optim
 import time
 import json
 import sys
-from torchvision.models import efficientnet_v2_s
-from Picard.models import *
+
+from models import *
 from datasets import *
 from loss import *
 
 batch_size = 500
 v_batch_size = 100
-epoch = 45
+epoch = 1
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.backends.cudnn.benchmark = True
@@ -34,10 +34,7 @@ for s in range(start_seed, start_seed+nb_seed):
   torch.manual_seed(s)
   np.random.seed(s)
 
-  #net = build_network()
-  net = efficientnet_v2_s(weights=None, num_classes=10)
-  net.features[0][0].stride = (1, 1)
-
+  net = build_network()
   net.to(device).half()
   for layer in net.modules():
     if isinstance(layer, nn.BatchNorm2d):
@@ -135,5 +132,4 @@ for s in range(start_seed, start_seed+nb_seed):
   filename = sys.argv[1]
   with open(filename, 'w') as fp:
     json.dump(data, fp)
-
 
