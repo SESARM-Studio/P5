@@ -16,16 +16,22 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 ``uv --version``
 
 ### 3. Create virtual environment (from root dir):
+
+```bash
+uv venv
+```
+
+### 4. Activate virtual environment (from root dir):
+**Mac / Linux**
 ```bash
 source .venv/bin/activate
 ```
 
 **Windows (PowerShell)**
-
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
-### 4. Install packages
+### 5. Install packages
 
 ```bash
 uv pip install -r requirements.txt
