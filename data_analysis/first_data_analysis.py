@@ -1,9 +1,7 @@
-import psycopg2
-from psycopg2 import sql
 from dotenv import load_dotenv
-import os
 import time
-
+import os
+from supabase import create_client, Client
 import matplotlib
 
 # Load environment variables from .env
@@ -19,7 +17,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 connection = psycopg2.connect(DATABASE_URL)
 
 
-'''
+
 def db_init_experiment(seed: int, no_epochs: int = 600) -> None:
   """
   - Initialises DB table with a row for each epoch for the given seed, filling in seed number and epoch number.\n
@@ -50,7 +48,7 @@ def db_init_experiment(seed: int, no_epochs: int = 600) -> None:
 
   except Exception as e:
     print(f"Committing queries failed due to error: {e}")
-'''
+
 
 
 def insert_experiment_data(experiment_seed: int, no_epochs: int = 600, experiment_data_accuracy: float = []):
