@@ -28,9 +28,9 @@ class IndexedDataset(Dataset):
     def __len__(self):
         return len(self.dataset)
 
-    def __getitems__(self, indices: list) -> list:
-        x, y = self.dataset[indices]
-        return x, y, indices
+    def __getitem__(self, img_id: list) -> list:
+        x, y = self.dataset[img_id]
+        return x, y, img_id
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--seed", type=int, required=True)
@@ -86,8 +86,8 @@ Model structure of EfficientNetV2-S can be seen on https://hfviewer.com/torchvis
 """
 
 STRIDE = (1,1) # Horizontal and vertical
-FEATURE_0_0 = "feature.0.0"
-FEATURE_2_0_BLOCK_0_0 = "feature.2.0.block.0.0"
+FEATURE_0_0 = "features.0.0"
+FEATURE_2_0_BLOCK_0_0 = "features.2.0.block.0.0"
 
 model = efficientnet_v2_s(weights=None, num_classes=10)
 model.get_submodule(FEATURE_0_0).stride = STRIDE
