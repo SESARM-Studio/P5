@@ -14,7 +14,7 @@ supabase = create_client(url, api_key)
 last_epoch = 130 # Will be changed when combined with Ramo code
 result = supabase.table("test_training_result").select("accuracy").eq("epoch_no", last_epoch).execute()
 
-# result.data contains a list of each row as a dictionary, this makes it into a list of just the accuracies.
+# result.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
 accuracy_data = np.array([row["accuracy"] for row in result.data if "accuracy" in row])
 
 min_accuracy = min(accuracy_data)
