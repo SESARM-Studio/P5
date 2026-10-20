@@ -44,7 +44,7 @@ ax.plot(graph_xpdf, graph_ypdf)
 plot_style = {"color": "darkblue", "marker": "|", "markersize": 20}
 ax.plot(accuracy_data, 0*accuracy_data, **plot_style)
 
-ax.set_xlabel("Density")
-ax.set_ylabel("Accuracy")
+ax.set_xlabel("Accuracy")
+ax.set_ylabel("Density")
 
 plt.show()
