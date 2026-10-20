@@ -36,3 +36,12 @@ source .venv/bin/activate
 ```bash
 uv pip install -r requirements.txt
 ```
+
+## How to train single model in experiment0 on AI LAB:
+```bash
+cd /ceph/project/p5_intelligent_seeds/P5/experiment0
+```
+**Change parameters in job.sh** 
+```bash
+sbatch job.sh
+```
