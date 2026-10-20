@@ -35,7 +35,6 @@ class IndexedDataset(Dataset):
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--seed", type=int, required=True)
 parser.add_argument("-e", "--epochs", type=int, required=True)
-parser.add_argument("--model-output", default="efficientnet_model.pth")
 parser.add_argument("--csv-output", default="training_results.csv")
 parser.add_argument("--dist-output", default="distribution_results.csv")
 args = parser.parse_args()
@@ -149,7 +148,3 @@ for epoch in range(args.epochs):
 
 print("Done!")
 print(f"Total time: {time.time() - epoch_start}")
-
-
-torch.save(model.state_dict(), args.model_output)
-print(f"Saved PyTorch Model State to {args.model_output}")

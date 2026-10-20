@@ -16,6 +16,5 @@ singularity exec --nv --bind $PROJECT/../../data:/data /ceph/container/pytorch/p
 	python3 $PROJECT/$SCRIPT \
 	--seed 10 \
 	--epochs 1 \
-	--model-output $PROJECT/model.pth \
 	--csv-output $PROJECT/output.csv \
 	--dist-output $PROJECT/pred_output.csv
