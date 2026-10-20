@@ -8,7 +8,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --time=04:00:00
 
-PROJECT="/ceph/project/p5_intelligent_seeds/P5/se_efnet"
+PROJECT="/ceph/project/p5_intelligent_seeds/P5/experiment0"
 SCRIPT="experiment0.py"
 
 singularity exec --nv --bind $PROJECT/data:/data /ceph/container/pytorch/pytorch_26.08.sif \
