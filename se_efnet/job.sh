@@ -9,7 +9,7 @@
 #SBATCH --time=04:00:00
 
 PROJECT="/ceph/project/p5_intelligent_seeds/P5/se_efnet"
-SCRIPT="train_combined.py"
+SCRIPT="experiment0.py"
 
 singularity exec --nv --bind $PROJECT/data:/data /ceph/container/pytorch/pytorch_26.08.sif \
 	python3 $PROJECT/$SCRIPT \
