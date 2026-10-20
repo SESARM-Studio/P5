@@ -10,9 +10,11 @@ api_key = os.getenv("SUPABASE_PUBLISHABLE_KEY")
 
 supabase = create_client(url, api_key)
 
-last_epoch = 130
+# Query the database
+last_epoch = 130 # Will be changed when combined with Ramo code
 result = supabase.table("test_training_result").select("accuracy").eq("epoch_no", last_epoch).execute()
 
+# result.data contains a list of each row as a dictionary, this makes it into a list of just the accuracies.
 accuracy_data = np.array([row["accuracy"] for row in result.data if "accuracy" in row])
 
 min_accuracy = min(accuracy_data)
@@ -25,25 +27,24 @@ print("Maximum accuracy:", max_accuracy)
 print("Mean:", round(mean,2))
 print("std:", round(std,2))
 
-#graph_xpdf = np.arange(np.floor(min_accuracy), np.ceil(max_accuracy), 0.1)
+# Create points from min to max with stepsize 0.1 and calculate the y-values according to Guassian Distribution
 graph_xpdf = np.arange(min_accuracy, max_accuracy, 0.1)
-graph_pdf = (1 / (std * np.sqrt(2*np.pi))) * np.exp(-((graph_xpdf-mean)**2)/(2*std**2)) 
+graph_ypdf = (1 / (std * np.sqrt(2*np.pi))) * np.exp(-((graph_xpdf-mean)**2)/(2*std**2)) 
 
 fig, ax = plt.subplots()
 
+#Plot the histogram
 histogram_style = {"facecolor": "lightblue", "edgecolor": "white", "linewidth": 1 }
 ax.hist(accuracy_data, density=True, **histogram_style)
 
-ax.plot(graph_xpdf, graph_pdf)
+#Plot the probability distribution function
+ax.plot(graph_xpdf, graph_ypdf)
 
+#Plot every data accuracy at the bottom of the graph as vertical lines
 plot_style = {"color": "darkblue", "marker": "|", "markersize": 20}
 ax.plot(accuracy_data, 0*accuracy_data, **plot_style)
 
-ax.set_ylabel("Accuracy")
 ax.set_xlabel("Density")
+ax.set_ylabel("Accuracy")
 
 plt.show()
-
-
-
-
