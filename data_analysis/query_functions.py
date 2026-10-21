@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-import time
 import os
 from supabase import create_client, Client, ClientOptions
 import matplotlib.pyplot as plt

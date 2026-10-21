@@ -1,10 +1,10 @@
 from dotenv import load_dotenv
 import time
 import os
-from supabase import create_client, Client, ClientOptions
 import matplotlib.pyplot as plt
 import numpy as np
-from supabase_functions import *
+from query_functions import *
+
 def sort_dict_by_epoch_no(arg):
     return arg['epoch_no']
 
@@ -14,8 +14,7 @@ supabase = create_supabase_connection()
 # Retrieve the data using our query functions from query_functions.py
 data_test_training_result = query_test_training_result(supabase)
 data_test_training_result.data.sort(key=sort_dict_by_epoch_no)#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
-data_distinct_training_epoch_no = query_distinct_training_id(supabase)
-data_distinct_training_id = query_distinct_training_epoch_no(supabase)
+data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
 
 # Create a list of all columns (keys), so one can access the values of the dictionaries
 column_list = []
@@ -26,7 +25,7 @@ for key in data_test_training_result.data[0]:
 # We append each number from the query of distinct epoch numbers (DB-column: epoch_no)
 # We sort them and use min/max for epoch start and end
 epochs = []
-for key in query_distinct_training_epoch_no.data:
+for key in data_distinct_training_epoch_no.data:
     epochs.append(key.get(column_list[1]))
 epochs.sort()
 epochs = np.array(epochs)
