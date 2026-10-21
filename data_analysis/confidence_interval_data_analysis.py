@@ -4,46 +4,22 @@ import os
 from supabase import create_client, Client, ClientOptions
 import matplotlib.pyplot as plt
 import numpy as np
-
+from supabase_functions import *
 def sort_dict_by_epoch_no(arg):
     return arg['epoch_no']
 
-# Load environment variables from .env
+#Establish supabase connection using our connection function from query_functions.py
+supabase = create_supabase_connection()
 
-load_dotenv()
-
-# Setup the connection to Supabase
-
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-
-supabase: Client = create_client(url, key)
-
-# Query structure: Contains a list variable called "data", that is a list of dictionaries.
-# The index of the list represents the row number, the key (dictionary) is the name of the column, and the value (dictionary) is the data point of the column and row
-
-query_test_training_result= (
-    supabase.table("test_training_result")
-    .select("*")
-    .execute()
-)
-query_test_training_result.data.sort(key=sort_dict_by_epoch_no)#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
-
-query_distinct_training_epoch_no = (
-    supabase.table("distinct_test_training_result_epoch_no")
-        .select("*")
-        .execute()
-)
-
-query_distinct_training_id = (
-    supabase.table("distinct_test_training_result_id")
-        .select("*")
-        .execute()
-)
+# Retrieve the data using our query functions from query_functions.py
+data_test_training_result = query_test_training_result(supabase)
+data_test_training_result.data.sort(key=sort_dict_by_epoch_no)#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
+data_distinct_training_epoch_no = query_distinct_training_id(supabase)
+data_distinct_training_id = query_distinct_training_epoch_no(supabase)
 
 # Create a list of all columns (keys), so one can access the values of the dictionaries
 column_list = []
-for key in query_test_training_result.data[0]:
+for key in data_test_training_result.data[0]:
     column_list.append(key)
 
 # Setup epoch datapoints for plotting:
@@ -61,21 +37,26 @@ epoch_end = max(epochs)
 # We take all the accuracies from the query, and store them in a numpy list
 # This enables the np.split function that takes arg1: a list and arg2: a number, and splits the list into a number of parts based on the number given 
 all_accuracies = []
-for dictionary in query_test_training_result.data:
+for dictionary in data_test_training_result.data:
     all_accuracies.append(dictionary.get("accuracy"))
 all_accuracies = np.array(all_accuracies)
-validation_accuracies = np.split(all_accuracies, len(epochs))
+testing_accuracies = np.split(all_accuracies, len(epochs))
 
-# From the rows in validation_accuracies, we can calculate:
-# Confidence intervals (lists of lower and upper bounds, standard deviation (lower and upper) and mean of validation accuracy at each epoch)
-lower_bound = [], upper_bound = [], mean = [], standard_deviation = [], lower_standard_deviation = [], upper_standard_deviation = []
+# From the rows in testing_accuracies, we can calculate:
+# Confidence intervals (lists of lower and upper bounds, standard deviation (lower and upper) and mean of testing accuracy at each epoch)
+lower_bound = []
+upper_bound = []
+mean = []
+standard_deviation = []
+lower_standard_deviation = []
+upper_standard_deviation = []
 for index in range(0,len(epochs)):
-    lower_bound.append(min(validation_accuracies[index]))
-    upper_bound.append(max(validation_accuracies[index]))
+    lower_bound.append(min(testing_accuracies[index]))
+    upper_bound.append(max(testing_accuracies[index]))
     
-    mean.append(np.mean(validation_accuracies[index]))
+    mean.append(np.mean(testing_accuracies[index]))
     
-    standard_deviation.append(np.std(validation_accuracies[index]))
+    standard_deviation.append(np.std(testing_accuracies[index]))
     lower_standard_deviation.append(mean[index]-standard_deviation[index])
     upper_standard_deviation.append(mean[index]+standard_deviation[index])
     
@@ -92,13 +73,13 @@ plot_epochs = np.concatenate(([1],plot_epochs))
 
 # Plot the figure
 plt.figure(figsize=(10, 6)) #Size of figure
-plt.plot(epochs, mean, label='Validation accuracy variation', color='black') #Plotting mean of validation accuracy
-plt.fill_between(epochs, lower_bound, upper_bound, color='xkcd:light red', alpha=0.2, label='min-max confidence Interval') #Plotting lower and upper bound of validation accuracy
+plt.plot(epochs, mean, label='Testing accuracy variation', color='black') #Plotting mean of testing accuracy
+plt.fill_between(epochs, lower_bound, upper_bound, color='xkcd:light red', alpha=0.2, label='min-max confidence Interval') #Plotting lower and upper bound of testing accuracy
 plt.fill_between(epochs, lower_standard_deviation, upper_standard_deviation, color='xkcd:vermillion', alpha=0.2, label='standard deviation confidence Interval')
 
-plt.title('Validation accuracy at each epoch - Confidence Interval')
+plt.title('Testing accuracy at each epoch - Confidence Interval')
 plt.xlabel('Epoch')
-plt.ylabel('Validation Accuracy')
+plt.ylabel('testing Accuracy')
 plt.xticks(plot_epochs)
 plt.legend()
 plt.grid(True)
@@ -125,6 +106,6 @@ for id_dict in query_distinct_training_id.data:
         temp2 = index_dict.get(column_list[0])
         if temp1 == temp2:
             row.append(index_dict.get(column_list[2]))
-    validation_accuracies.append(row)
+    testing_accuracies.append(row)
 '''
     
