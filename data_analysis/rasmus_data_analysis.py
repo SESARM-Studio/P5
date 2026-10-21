@@ -9,6 +9,9 @@ import numpy as np
 def sort_dict_by_training_id(arg):
     return arg['training_id']
 
+def sort_dict_by_epoch_no(arg):
+    return arg['epoch_no']
+
 # Load environment variables from .env
 
 load_dotenv()
@@ -28,7 +31,12 @@ query_test_training_result= (
     .select("*")
     .execute()
 )
-query_test_training_result.data.sort(key=sort_dict_by_training_id)
+query_test_training_result.data.sort(key=sort_dict_by_epoch_no)
+
+all_accuracies = []
+for dictionary in query_test_training_result.data:
+    all_accuracies.append(dictionary.get("accuracy"))
+all_accuracies = np.array(all_accuracies)
 
 query_distinct_training_epoch_no = (
     supabase.table("distinct_test_training_result_epoch_no")
@@ -64,29 +72,20 @@ validation_accuracies = []
 
 # Calculate the validation accuracy for each epoch
 
-for id_dict in query_distinct_training_id.data:
-    row = []
-    for index_dict in query_test_training_result.data:
-        temp1 = id_dict.get(column_list[0])
-        temp2 = index_dict.get(column_list[0])
-        if temp1 == temp2:
-            row.append(index_dict.get(column_list[2]))
-    validation_accuracies.append(row)
+validation_accuracies = np.split(all_accuracies, len(epochs))
+
 
 # Confidence intervals (lists of minimum lower and maximum upper bounds as well as standard deviation lower and upper bound)
 min_lower_bound = []
-for i in range(0,len(query_distinct_training_id.data)):
-    for j in range(0,len(epochs)):
-        print(validation_accuracies[i][j])
-
 max_upper_bound = []
-standard_deviation_lower_bound = []
-standard_deviation_upper_bound = []
-
+mean = []
+standard_deviation = []
 for i in range(0,len(query_distinct_training_id.data)):
-    for j in range(0,len(epochs)):
-        print(validation_accuracies[i][j])
 
+    print(validation_accuracies[i])
+    min_lower_bound.append(min(validation_accuracies[i]))
+    max_upper_bound.append(max(validation_accuracies[i]))
+    
 
 # Plot the figure
 plt.figure(figsize=(10, 6))
@@ -115,4 +114,13 @@ for tuple in query.data:
 
 
 
+for id_dict in query_distinct_training_id.data:
+    row = []
+    for index_dict in query_test_training_result.data:
+        temp1 = id_dict.get(column_list[0])
+        temp2 = index_dict.get(column_list[0])
+        if temp1 == temp2:
+            row.append(index_dict.get(column_list[2]))
+    validation_accuracies.append(row)
 '''
+    
