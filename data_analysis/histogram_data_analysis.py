@@ -1,26 +1,22 @@
-import os
 import matplotlib.pyplot as plt
 import numpy as np
-from dotenv import load_dotenv
-from supabase import create_client
+from query_functions import *
 
-load_dotenv()
-url = os.getenv("SUPABASE_URL")
-api_key = os.getenv("SUPABASE_PUBLISHABLE_KEY")
+supabase = create_supabase_connection()
 
-supabase = create_client(url, api_key)
+# Query the database to get a list of dictionaries with epochs number
+result_epochs_no_query = query_distinct_training_epoch_no(supabase)
+list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query.data if "epoch_no" in row]
+last_epoch = max(list_epochs_no)
 
-# Query the database
-last_epoch = 130 # Will be changed when combined with Ramo code
-result = supabase.table("test_training_result").select("accuracy").eq("epoch_no", last_epoch).execute()
+result_last_epoch_accuracies = query_last_training_epoch_accuracies(supabase, last_epoch)
+# result_last_epoch_accuracies.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
+list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies.data if "accuracy" in row])
 
-# result.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
-accuracy_data = np.array([row["accuracy"] for row in result.data if "accuracy" in row])
-
-min_accuracy = min(accuracy_data)
-max_accuracy = max(accuracy_data)
-mean = np.mean(accuracy_data)
-std = np.std(accuracy_data)
+min_accuracy = min(list_accuracy_data)
+max_accuracy = max(list_accuracy_data)
+mean = np.mean(list_accuracy_data)
+std = np.std(list_accuracy_data)
 
 print("Minimum accuracy:", min_accuracy)
 print("Maximum accuracy:", max_accuracy)
@@ -35,14 +31,14 @@ fig, ax = plt.subplots()
 
 #Plot the histogram
 histogram_style = {"facecolor": "lightblue", "edgecolor": "white", "linewidth": 1 }
-ax.hist(accuracy_data, density=True, **histogram_style)
+ax.hist(list_accuracy_data, density=True, **histogram_style)
 
 #Plot the probability distribution function
 ax.plot(graph_xpdf, graph_ypdf)
 
 #Plot every data accuracy at the bottom of the graph as vertical lines
 plot_style = {"color": "darkblue", "marker": "|", "markersize": 20}
-ax.plot(accuracy_data, 0*accuracy_data, **plot_style)
+ax.plot(list_accuracy_data, 0*list_accuracy_data, **plot_style)
 
 ax.set_xlabel("Accuracy")
 ax.set_ylabel("Density")

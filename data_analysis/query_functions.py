@@ -1,8 +1,6 @@
 from dotenv import load_dotenv
 import os
 from supabase import create_client, Client, ClientOptions
-import matplotlib.pyplot as plt
-import numpy as np
 
 def create_supabase_connection():
     # Load environment variables from .env
@@ -25,16 +23,17 @@ def query_test_training_result(supabase):
         .execute()
     )
 
-def query_distinct_training_id(supabase):
-    return (
-        supabase.table("distinct_test_training_result_id")
-        .select("*")
-        .execute()
-    )
-
 def query_distinct_training_epoch_no(supabase):
     return (
         supabase.table("distinct_test_training_result_epoch_no")
         .select("*")
+        .execute()
+    )
+
+def query_last_training_epoch_accuracies(supabase, last_epoch):
+    return (
+        supabase.table("test_training_result")
+        .select("accuracy")
+        .eq("epoch_no", last_epoch)
         .execute()
     )

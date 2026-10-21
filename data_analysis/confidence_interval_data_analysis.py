@@ -1,6 +1,3 @@
-from dotenv import load_dotenv
-import time
-import os
 import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
