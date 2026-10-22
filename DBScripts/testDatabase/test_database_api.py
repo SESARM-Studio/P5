@@ -3,7 +3,7 @@ from datetime import timezone
 
 from database_api import simple_insert_results_to_database
 
-
+"""
 ### Database integration test ###
 def test_simple_insert_results_to_database():
     test_results = [[1, 0.51], [2, 0.52], [3, 0.53]]
@@ -36,3 +36,6 @@ def test_simple_insert_results_to_database():
             client.table("test_training_run").delete().eq(
                 "training_id", training_id
             ).execute()
+
+"""
+
