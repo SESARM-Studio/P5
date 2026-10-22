@@ -1,5 +1,4 @@
-
-from database_login import setup_supabase_client
+from .database_login import setup_supabase_client
 
 
 
