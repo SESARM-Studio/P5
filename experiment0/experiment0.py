@@ -98,7 +98,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
 def train(dataloader, model, loss_fn, optimizer):
     model.train()
-    for batch, (X, labels_in_batch, _) in enumerate(dataloader):
+    for X, labels_in_batch, _ in dataloader:
         X, labels_in_batch = X.to(device), labels_in_batch.to(device)
 
         # Compute prediction error
@@ -121,8 +121,9 @@ def test(dataloader, model, loss_fn, args, epoch):
             pred = model(X)
             test_loss += loss_fn(pred, labels_in_batch).item()
             correct += (pred.argmax(1) == labels_in_batch).type(torch.float).sum().item()
-            torch.set_printoptions(precision=3, sci_mode=False)
 
+            # Iterates over each image of the batch, and writes class predictions,
+            # along with seed, epoch, image id and correct label to CSV file
             with open(f"{args.dist_output}", "a", newline='') as s:
                 batch_info = zip(image_ids_in_batch.tolist(), labels_in_batch.tolist(), pred.softmax(1).tolist())
                 for image_id, label, image_prediction in batch_info:
