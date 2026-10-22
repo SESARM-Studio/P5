@@ -1,5 +1,4 @@
-
-from database_login import setup_supabase_client
+from .database_login import setup_supabase_client
 
 TEMP_CONFIG_ID = "ce483888-9231-44e2-bf95-f2a271f8d95a" #temporary hardcoded config id to ensure foreign key in training_run
 

@@ -35,6 +35,7 @@ class IndexedDataset(Dataset):
         return x, y, img_id
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--training-id", required=True)
 parser.add_argument("-s", "--seed", type=int, required=True)
 parser.add_argument("-e", "--epochs", type=int, required=True)
 parser.add_argument("--csv-output", default="training_results.csv")

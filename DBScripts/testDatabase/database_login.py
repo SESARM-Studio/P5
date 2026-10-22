@@ -1,12 +1,12 @@
 import os
 from dotenv import load_dotenv
+from supabase import create_client
 
 # Load variables from .env file into environment
 load_dotenv()
 url = os.getenv("SUPABASE_URL")
 api_key = os.getenv("SUPABASE_PRIVATE_KEY")
 
-from supabase import create_client
 
 
 ### setup the supabase client ###
