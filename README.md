@@ -36,9 +36,12 @@ source .venv/bin/activate
 ```bash
 uv pip install -r requirements.txt
 ```
-## Dev setup
 
-1 (Own pc) `git clone git@github.com:SESARM-Studio/P5.git`
-2 (Own pc) `git remote add deploy '@student.aau.dk@ailab-fe01.srv.aau.dk:/ceph/project/p5_intelligent_seeds/bare_project.git'`
-3 (ON SERVER ON YOUR USER) `git config --global --add safe.directory /ceph/project/p5_intelligent_seeds/bare_project.git`
-4 (Own pc) `git push deploy`
+## How to train single model in experiment0 on AI LAB:
+```bash
+cd /ceph/project/p5_intelligent_seeds/P5/experiment0
+```
+**Change parameters in job.sh** 
+```bash
+sbatch job.sh
+```
