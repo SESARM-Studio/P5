@@ -1,4 +1,5 @@
 from .database_login import setup_supabase_client
+from supabase import Client
 
 TEMP_CONFIG_ID = "ce483888-9231-44e2-bf95-f2a271f8d95a" #temporary hardcoded config id to ensure foreign key in training_run
 
@@ -70,10 +71,13 @@ def initialize_training (client, seed, config):
     return training_ID
 
 #Insert the results and update the status of the training run.
-def finalize_training (client, training_ID, results):
-    success = False
-
+def finalize_training (client, training_ID, results, end_time):
+    success_insert = False
+    success_update = False
     finalized_results = results_to_dict(training_ID, results)
+
+    if not isinstance(client, Client):
+        raise TypeError("Expected a supabase client")
 
     try:
         response = (
@@ -82,25 +86,40 @@ def finalize_training (client, training_ID, results):
                     .execute()
                 )
 
-        if response.count == len(finalized_results):
-            success = True
+        if len(response.data) == len(finalized_results):
+            success_insert = True
         else:
             print("The amount of rows added to the database does not fit with the amount of rows from the training")
             print(f"Rows added: {response.count} \n Rows from training: {len(finalized_results)}")
-            success = False
-            
+            success_insert = False
+
+        
+        response = (
+                    client.table("training_run")
+                    .update({"end_time": end_time})
+                    .eq("training_id", training_ID)
+                    .execute()
+        )
+
+        if len(response.data) == 1:
+            if  response.data[0]["training_id"] == training_ID and response.data[0]["end_time"] == end_time:
+                success_update = True
+            else:
+                print("The training ID and the end time does not match the row that got changed in the database")
+                success_update = False
+        else:
+            print(f"{response.count} rows got updated when only 1 should")
+            success_update = False
 
     except Exception as e:
         print(f"Error occurred while inserting results: {e}")
-        respone = None
-
+        success_update = False
+        success_insert = False
     
-    # 1. Check_client
-    # 2. Check_data
-    # 3. Perform database operations
-    # 4. Return results
-    
-    return success
+    if success_update and success_insert:
+        return True
+    else:
+        return False
 
 #Must return a list with the final accuracy of all finalized experiments with a unique pair of configuration and seed and produce a warning if there are experiments that are not yet finalized.
 def collect_final_results (client):
