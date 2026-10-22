@@ -15,7 +15,7 @@ def main():
         if seed is None:
             exit(0)
 
-        subprocess.check_call(['/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', seed])
+        subprocess.check_call(['sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed)])
 
 while True:
     main()
