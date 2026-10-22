@@ -14,7 +14,7 @@ SCRIPT="experiment0.py"
 
 singularity exec --nv --bind $PROJECT/../../data:/data /ceph/container/pytorch/pytorch_26.08.sif \
 	python3 $PROJECT/$SCRIPT \
-	--seed 10 \
-	--epochs 1 \
-	--csv-output $PROJECT/output.csv \
-	--dist-output $PROJECT/pred_output.csv
+	--seed $1 \
+	--epochs 60 \
+	--csv-output $PROJECT/outputs/output_$1.csv \
+	--dist-output $PROJECT/outputs/pred_output_$1.csv
