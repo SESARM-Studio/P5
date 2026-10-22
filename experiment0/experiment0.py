@@ -12,6 +12,8 @@ from torchvision.transforms import v2
 from torchvision.models import efficientnet_v2_s
 from torch.utils.data import Dataset
 
+
+
 """
 Main structure is inspired by PyTorch docs:
 https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
@@ -136,6 +138,7 @@ def test(dataloader, model, loss_fn, args, epoch):
 
 
 epoch_start = time.time();
+list_of_epochs_accuracy = []
 for epoch in range(args.epochs):
     epoch_time = time.time()
     print(f"\nEpoch {epoch}\n-------------------------------")
@@ -144,8 +147,10 @@ for epoch in range(args.epochs):
 
     print(f"Accuracy: {epoch_acc}, Avg loss: {epoch_loss}")
     print(f"Time: {time.time() - epoch_time}")
-    with open(f"{args.csv_output}", "a", newline='') as f:
-        csv.writer(f).writerow([args.seed, epoch, epoch_acc, epoch_loss, time.time() - epoch_time])
+
+    list_of_epochs_accuracy.append([epoch, epoch_acc])
+
+
 
 print("Done!")
 print(f"Total time: {time.time() - epoch_start}")

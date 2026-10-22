@@ -73,6 +73,28 @@ def initialize_training (client, seed, config):
 #Insert the results and update the status of the training run.
 def finalize_training (client, training_ID, results):
     success = False
+
+    finalized_results = results_to_dict(training_ID, results)
+
+    try:
+        response = (
+                    client.table("training_result")
+                    .insert(finalized_results)
+                    .execute()
+                )
+
+        if response.count == len(finalized_results):
+            success = True
+        else:
+            print("The amount of rows added to the database does not fit with the amount of rows from the training")
+            print(f"Rows added: {response.count} \n Rows from training: {len(finalized_results)}")
+            success = False
+            
+
+    except Exception as e:
+        print(f"Error occurred while inserting results: {e}")
+        respone = None
+
     
     # 1. Check_client
     # 2. Check_data
