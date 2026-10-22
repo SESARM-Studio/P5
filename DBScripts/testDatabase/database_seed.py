@@ -18,7 +18,7 @@ def get_seed():
         )
 
         if not response.data:
-            raise RuntimeError("No unused seeds available")
+            return None
 
         seed = response.data[0]["seed"]
 
