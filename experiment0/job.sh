@@ -10,10 +10,10 @@
 
 PROJECT="/ceph/project/p5_intelligent_seeds/P5/experiment0"
 DATA_PATH="/ceph/project/p5_intelligent_seeds/data"
-SCRIPT="experiment0.py"
+SCRIPT="experiment0"
 
 singularity exec --nv --bind $PROJECT/../../data:/data /ceph/container/pytorch/pytorch_26.08.sif \
-	python3 $PROJECT/$SCRIPT \
+	python3 -m $PROJECT.$SCRIPT \
 	--seed $1 \
 	--epochs 60 \
 	--csv-output $PROJECT/outputs/output_$1.csv \
