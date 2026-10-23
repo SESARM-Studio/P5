@@ -26,18 +26,19 @@ def main():
     running_jobs = len(squeue_result[1:])
     loop_range = 8 - running_jobs
 
+    print(f"{running_jobs} running jobs. Starting {loop_range}")
+
     for _ in range(loop_range):
         seed = get_seed(client)
         if seed is None:
             exit(0)
 
         training_id = initialize_training(client, seed, temp_config_id, args.uid)
-        subprocess.run(["bash", str(PROJECT_ROOT), 'sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id)],
-            env={**os.environ, "PYTHON": sys.executable},
+        subprocess.run(['sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id)],
             cwd=PROJECT_ROOT,
             check=True,
         )
 
 while True:
     main()
-    time.sleep(60)
+    time.sleep(30)

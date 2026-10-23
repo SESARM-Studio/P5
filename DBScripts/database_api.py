@@ -1,6 +1,6 @@
 from .database_login import setup_supabase_client
 from supabase import Client
-import datetime
+from datetime import datetime, timezone
 
 TEMP_CONFIG_ID = "ce483888-9231-44e2-bf95-f2a271f8d95a" #temporary hardcoded config id to ensure foreign key in training_run
 
@@ -72,7 +72,7 @@ def initialize_training (client, seed, config, user_name):
 
     response = (
         client.table("training_run")
-        .insert({"config_id": config, "run_by": user_name, "seed": seed, "start_time": datetime.datetime.now().isoformat()})
+        .insert({"config_id": config, "run_by": user_name, "seed": seed, "start_time": datetime.now().isoformat()})
         .select("training_id")
         .execute()
     )
@@ -110,10 +110,11 @@ def finalize_training (client, training_id, results, end_time):
         )
 
         if len(response_update.data) == 1:
-            if  response_update.data[0]["training_id"] == training_id and response_update.data[0]["end_time"] == end_time:
+            if  response_update.data[0]["training_id"] == training_id and response_update.data[0]["end_time"] == end_time.replace(tzinfo=timezone.utc):
                 success_update = True
             else:
                 print("The training ID and the end time does not match the row that got changed in the database")
+                print(response_update.data[0]["training_id"], training_id, response_update.data[0]["end_time"], end_time.replace(tzinfo=timezone.utc))
                 success_update = False
         else:
             print(f"{response_update.count} rows got updated when only 1 should")
