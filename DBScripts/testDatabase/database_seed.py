@@ -1,10 +1,4 @@
-from .database_login import setup_supabase_client
-
-
-
-def get_seed():
-    
-    client = setup_supabase_client("service_role")
+def get_seed(client):
     
     while True:
         # Find the first unused seed

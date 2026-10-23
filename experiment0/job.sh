@@ -17,4 +17,5 @@ singularity exec --nv --bind $PROJECT/../../data:/data /ceph/container/pytorch/p
 	--seed $1 \
 	--epochs 60 \
 	--csv-output $PROJECT/outputs/output_$1.csv \
-	--dist-output $PROJECT/outputs/pred_output_$1.csv
+	--dist-output $PROJECT/outputs/pred_output_$1.csv \
+	--training-id $2

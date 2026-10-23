@@ -10,7 +10,7 @@ api_key = os.getenv("SUPABASE_PRIVATE_KEY")
 
 
 ### setup the supabase client ###
-def setup_supabase_client(user_type):
+def setup_supabase_client():
 
     try:
         client = create_client(url, api_key)
