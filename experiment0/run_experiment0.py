@@ -4,10 +4,15 @@ from DBScripts.database_api import setup_supabase_client, initialize_training
 import subprocess
 import time
 import argparse
+from pathlib import Path
+import sys
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--uid", required=True)
 args = parser.parse_args()
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 temp_config_id = 'e4fecdcf-76a0-4e29-ae21-852decdd4513'
 client = setup_supabase_client()
@@ -27,7 +32,11 @@ def main():
             exit(0)
 
         training_id = initialize_training(client, seed, temp_config_id, args.uid)
-        subprocess.check_call(['sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id)])
+        subprocess.run(["bash", str(PROJECT_ROOT), 'sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id)],
+            env={**os.environ, "PYTHON": sys.executable},
+            cwd=PROJECT_ROOT,
+            check=True,
+        )
 
 while True:
     main()
