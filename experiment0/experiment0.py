@@ -153,7 +153,7 @@ for epoch in range(args.epochs):
 
     list_of_epochs_accuracy.append([epoch, epoch_acc])
 
-end_time = datetime.datetime.now()
+end_time = datetime.datetime.now().isoformat()
 
 client = setup_supabase_client()
 finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time)

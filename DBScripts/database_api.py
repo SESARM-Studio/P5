@@ -72,7 +72,7 @@ def initialize_training (client, seed, config, user_name):
 
     response = (
         client.table("training_run")
-        .insert({"config_id": config, "run_by": user_name, "seed": seed, "start_time": datetime.datetime.now()})
+        .insert({"config_id": config, "run_by": user_name, "seed": seed, "start_time": datetime.datetime.now().isoformat()})
         .select("training_id")
         .execute()
     )
