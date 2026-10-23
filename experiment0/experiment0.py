@@ -2,6 +2,9 @@ import argparse
 import csv
 import random
 import time
+import datetime
+from DBScripts.testDatabase.database_api import *
+from DBScripts.testDatabase.database_login import *
 
 import numpy as np
 import torch
@@ -151,7 +154,10 @@ for epoch in range(args.epochs):
 
     list_of_epochs_accuracy.append([epoch, epoch_acc])
 
+end_time = datetime.datetime.now()
 
+client = setup_supabase_client()
+finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time)
 
 print("Done!")
 print(f"Total time: {time.time() - epoch_start}")

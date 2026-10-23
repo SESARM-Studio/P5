@@ -80,35 +80,35 @@ def finalize_training (client, training_ID, results, end_time):
         raise TypeError("Expected a supabase client")
 
     try:
-        response = (
+        response_insert = (
                     client.table("training_result")
                     .insert(finalized_results)
                     .execute()
                 )
 
-        if len(response.data) == len(finalized_results):
+        if len(response_insert.data) == len(finalized_results):
             success_insert = True
         else:
             print("The amount of rows added to the database does not fit with the amount of rows from the training")
-            print(f"Rows added: {response.count} \n Rows from training: {len(finalized_results)}")
+            print(f"Rows added: {len(response_insert)} \n Rows from training: {len(finalized_results)}")
             success_insert = False
 
         
-        response = (
+        response_update = (
                     client.table("training_run")
                     .update({"end_time": end_time})
                     .eq("training_id", training_ID)
                     .execute()
         )
 
-        if len(response.data) == 1:
-            if  response.data[0]["training_id"] == training_ID and response.data[0]["end_time"] == end_time:
+        if len(response_update.data) == 1:
+            if  response_update.data[0]["training_id"] == training_ID and response_update.data[0]["end_time"] == end_time:
                 success_update = True
             else:
                 print("The training ID and the end time does not match the row that got changed in the database")
                 success_update = False
         else:
-            print(f"{response.count} rows got updated when only 1 should")
+            print(f"{response_update.count} rows got updated when only 1 should")
             success_update = False
 
     except Exception as e:
