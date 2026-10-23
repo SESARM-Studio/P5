@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=com_CNN_training
-#SBATCH --output=eftest.out
-#SBATCH --error=eftest.err
+#SBATCH --output=logs/%x_%j.out
+#SBATCH --error=logs/%x_%j.err
 #SBATCH --mem=24G
 #SBATCH --cpus-per-task=15
 #SBATCH --gres=gpu:1
@@ -18,6 +18,8 @@ CONTAINER="/ceph/container/pytorch/pytorch_26.08.sif"
 
 SEED="$1"
 TRAINING_ID="$2"
+
+echo "seed=$1"
 
 cd "$PROJECT_ROOT"
 PYTHON="$PROJECT_ROOT/.venv/bin/python"
