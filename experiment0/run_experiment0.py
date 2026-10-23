@@ -1,5 +1,5 @@
-from DBScripts.testDatabase.database_seed import *
-from DBScripts.testDatabase.database_api import *
+from DBScripts.database_seed import get_seed
+from DBScripts.database_api import setup_supabase_client, initialize_training
 
 import subprocess
 import time

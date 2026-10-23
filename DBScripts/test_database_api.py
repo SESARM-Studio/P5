@@ -1,7 +1,7 @@
 from datetime import datetime
 from datetime import timezone
 
-from database_api import simple_insert_results_to_database
+from .database_api import simple_insert_results_to_database
 
 """
 ### Database integration test ###

@@ -2,9 +2,8 @@ import argparse
 import csv
 import random
 import time
-import datetime
-from DBScripts.testDatabase.database_api import *
-from DBScripts.testDatabase.database_login import *
+from DBScripts.database_api import *
+from DBScripts.database_login import *
 
 import numpy as np
 import torch
