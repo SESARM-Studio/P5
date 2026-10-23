@@ -18,9 +18,10 @@ def main():
             capture_output=True,
             text=True
     ).stdout.strip().splitlines()
-    running_jobs = squeue_result[1:]
+    running_jobs = len(squeue_result[1:])
+    loop_range = 8 - running_jobs
 
-    for _ in range(8-running_jobs):
+    for _ in range(loop_range):
         seed = get_seed(client)
         if seed is None:
             exit(0)
