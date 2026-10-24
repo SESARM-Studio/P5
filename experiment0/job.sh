@@ -6,7 +6,7 @@
 #SBATCH --mem=24G
 #SBATCH --cpus-per-task=15
 #SBATCH --gres=gpu:1
-#SBATCH --time=04:00:00
+#SBATCH --time=06:00:00
 
 set -euo pipefail
 
@@ -23,6 +23,14 @@ echo "seed=$1"
 
 cd "$PROJECT_ROOT"
 PYTHON="$PROJECT_ROOT/.venv/bin/python"
+
+# If Singularity fails, try again. 
+for try in {1..10}; do
+  singularity exec /ceph/container/pytorch/pytorch_26.08.sif true 2>/dev/null && break
+  echo "Singularity failed (try $try), trying again in 200 seconds" >&2
+  sleep 200
+done
+
 
 singularity exec --nv --bind "$PROJECT_ROOT" --bind "$DATA_PATH:/data" "$CONTAINER" \
 	"$PYTHON" -m "$MODULE" \
