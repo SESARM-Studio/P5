@@ -82,26 +82,3 @@ plt.grid(True)
 plt.show()
 
 
-
-''' Graveyard
-
-# Create matrix of query
-matrix = []
-for tuple in query.data:
-    row = []
-    for values in tuple.values():
-        row.append(values)
-    matrix.append(row)
-
-
-
-for id_dict in query_distinct_training_id.data:
-    row = []
-    for index_dict in query_test_training_result.data:
-        temp1 = id_dict.get(column_list[0])
-        temp2 = index_dict.get(column_list[0])
-        if temp1 == temp2:
-            row.append(index_dict.get(column_list[2]))
-    testing_accuracies.append(row)
-'''
-    
