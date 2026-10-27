@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
 
+FIRST_ROW = 0
+
 def sort_dict_by_epoch_no(arg):
     return arg['epoch_no']
 
@@ -15,15 +17,16 @@ data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
 
 # Create a list of all columns (keys), so one can access the values of the dictionaries
 column_list = []
-for key in data_test_training_result.data[0]:
-    column_list.append(key)
+for column_name in data_test_training_result.data[FIRST_ROW]:
+    column_list.append(column_name)
 
 # Setup epoch datapoints for plotting:
 # We append each number from the query of distinct epoch numbers (DB-column: epoch_no)
 # We sort them and use min/max for epoch start and end
 epochs = []
-for key in data_distinct_training_epoch_no.data:
-    epochs.append(key.get(column_list[1]))
+for row in data_distinct_training_epoch_no.data:
+    epoch = row.get(column_list[1])
+    epochs.append(epoch)
 epochs.sort()
 epochs = np.array(epochs)
 epoch_start = min(epochs)
