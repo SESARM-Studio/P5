@@ -18,21 +18,21 @@ def create_supabase_connection():
 # The index of the list represents the row number, the key (dictionary) is the name of the column, and the value (dictionary) is the data point of the column and row
 def query_test_training_result(supabase):
     return (
-        supabase.table("test_training_result")
+        supabase.table("training_result")
         .select("*")
         .execute()
     )
 
 def query_distinct_training_epoch_no(supabase):
     return (
-        supabase.table("distinct_test_training_result_epoch_no")
+        supabase.table("distinct_training_result_epoch_no")
         .select("*")
         .execute()
     )
 
 def query_last_training_epoch_accuracies(supabase, last_epoch):
     return (
-        supabase.table("test_training_result")
+        supabase.table("training_result")
         .select("accuracy")
         .eq("epoch_no", last_epoch)
         .execute()
