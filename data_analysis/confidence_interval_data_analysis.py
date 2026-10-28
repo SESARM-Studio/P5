@@ -39,6 +39,7 @@ all_accuracies = []
 for dictionary in data_test_training_result.data:
     all_accuracies.append(dictionary.get("accuracy"))
 all_accuracies = np.array(all_accuracies)
+all_accuracies *= 100 # Multiply decimal values to become percentage values
 testing_accuracies = np.split(all_accuracies, len(epochs))
 
 # From the rows in testing_accuracies, we can calculate:
