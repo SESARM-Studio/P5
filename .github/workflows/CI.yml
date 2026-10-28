@@ -26,6 +26,6 @@ jobs:
 
     - name: Test with PyTest
       env:
-          SECRET_KEY: ${{ secrets.SUPABASE_KEY }}
-          SECRET_KEY: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       run: pytest
