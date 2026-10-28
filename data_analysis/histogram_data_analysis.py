@@ -12,6 +12,7 @@ last_epoch = max(list_epochs_no)
 result_last_epoch_accuracies = query_last_training_epoch_accuracies(supabase, last_epoch)
 # result_last_epoch_accuracies.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
 list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies.data if "accuracy" in row])
+list_accuracy_data *= 100 # Multiply decimal values to become percentage values
 
 min_accuracy = min(list_accuracy_data)
 max_accuracy = max(list_accuracy_data)
