@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
 
+PDF_STEPSIZE = 0.1
+HISTOGRAM_BINS = 20
+
 supabase = create_supabase_connection()
 
 # Query the database to get a list of dictionaries with epochs number
@@ -25,21 +28,22 @@ print("Mean:", round(mean,2))
 print("std:", round(std,2))
 
 # Create points from min to max with stepsize 0.1 and calculate the y-values according to Guassian Distribution
-graph_xpdf = np.arange(min_accuracy, max_accuracy, 0.1)
+graph_xpdf = np.arange(min_accuracy, max_accuracy, PDF_STEPSIZE)
 graph_ypdf = (1 / (std * np.sqrt(2*np.pi))) * np.exp(-((graph_xpdf-mean)**2)/(2*std**2)) 
 
 fig, ax = plt.subplots()
 
 #Plot the histogram
 histogram_style = {"facecolor": "lightblue", "edgecolor": "white", "linewidth": 1 }
-ax.hist(list_accuracy_data, density=True, **histogram_style)
+ax.hist(list_accuracy_data, bins=HISTOGRAM_BINS, density=True, **histogram_style)
 
 #Plot the probability distribution function
 ax.plot(graph_xpdf, graph_ypdf)
 
 #Plot every data accuracy at the bottom of the graph as vertical lines
 plot_style = {"color": "darkblue", "marker": "|", "markersize": 20}
-ax.plot(list_accuracy_data, 0*list_accuracy_data, **plot_style)
+y_zeroes = 0*list_accuracy_data
+ax.plot(list_accuracy_data, y_zeroes, **plot_style)
 
 ax.set_xlabel("Accuracy")
 ax.set_ylabel("Density")
