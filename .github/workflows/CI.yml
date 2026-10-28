@@ -18,9 +18,6 @@ jobs:
           python-version: 3.12
           cache: 'pip'
 
-    - name: Setup environment
-      run: python3 -m venv env && source env/bin/activate
-
     - name: Install dependencies
       run: pip install -r requirements.txt
 
