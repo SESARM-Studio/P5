@@ -8,9 +8,11 @@ from pathlib import Path
 import sys
 import os
 
+# User id is a required argument. The UID corresponds to the run_by column in the training_run table
 parser = argparse.ArgumentParser()
 parser.add_argument("--uid", required=True)
 args = parser.parse_args()
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -18,11 +20,14 @@ temp_config_id = 'e4fecdcf-76a0-4e29-ae21-852decdd4513'
 client = setup_supabase_client()
 
 def main():
-    squeue_result = subprocess.run(
-            ["squeue", "--me"],
-            capture_output=True,
-            text=True
-    ).stdout.strip().splitlines()
+    try:
+        squeue_result = subprocess.run(
+                ["squeue", "--me"],
+                capture_output=True,
+                text=True
+        ).stdout.strip().splitlines()
+    except FileNotFoundError as e:
+        sys.exit("Error: squeue could not be found. Is slurm installed on the machine?")
     running_jobs = len(squeue_result[1:])
     loop_range = 8 - running_jobs
 
