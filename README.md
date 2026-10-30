@@ -45,3 +45,12 @@ cd /ceph/project/p5_intelligent_seeds/P5/experiment0
 ```bash
 sbatch job.sh
 ```
+
+## How to run Experiment 0 on AI LAB:
+```bash
+screen -S exp0
+cd /ceph/project/p5_intelligent_seeds/P5/
+.venv-login/bin/python -m experiment0.run_experiment0 --uid <Your name>
+```
+***Afterwards: Click Ctrl + A + D***
+Should return something like: [detached from 2341069.exp0]
