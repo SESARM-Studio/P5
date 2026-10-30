@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from DBScripts.validation import validate_integer, validate_client, validate_results, validate_string, validate_response
+from db_scripts.validation import validate_integer, validate_client, validate_results, validate_string, validate_response
 
 ### Database API ###
 
