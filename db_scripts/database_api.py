@@ -93,9 +93,9 @@ def finalize_training (client, training_id, results, end_time):
             else:
                 print("The training ID and/or the end time does not match the row that got changed in the database")
                 print(f"Training ID from training: {training_id}")
-                print(f"Training ID from database: {response_update.data[0]["training_id"]}")
+                print(f"Training ID from database: {response_update.data[0]['training_id']}")
                 print(f"End time from training: {end_time.replace(tzinfo=timezone.utc)}")
-                print(f"End time from database: {response_update.data[0]["end_time"]}")
+                print(f"End time from database: {response_update.data[0]['end_time']}")
                 success_update = False
         else:
             print(f"{len(response_update.data)} rows got updated when only 1 should")
