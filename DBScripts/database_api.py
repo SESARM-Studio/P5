@@ -1,9 +1,5 @@
-from .database_login import setup_supabase_client
-from supabase import Client
 from datetime import datetime, timezone
-
-TEMP_CONFIG_ID = "ce483888-9231-44e2-bf95-f2a271f8d95a" #temporary hardcoded config id to ensure foreign key in training_run
-
+from DBScripts.validation import validate_integer, validate_client, validate_results, validate_string, validate_response
 
 ### Database API ###
 
@@ -13,44 +9,6 @@ def results_to_dict(training_id, results):
         {"training_id": training_id, "epoch_no": epoch, "accuracy": accuracy}
         for epoch, accuracy in results
     ]
-
-def simple_insert_results_to_database(user_name, seed, results, start_time, end_time):
-    
-    client = None
-    training_id = None
-    response = None
-    
-    try:
-        client = setup_supabase_client()
-
-        # insert training run
-        response = (
-            client.table("test_training_run")
-            .insert({"config_id":TEMP_CONFIG_ID, "run_by": user_name, "seed": seed, "start_time": start_time, "end_time": end_time})
-            .select("training_id")
-            .execute()
-        )
-
-        # collect training ID
-        training_id = response.data[0]["training_id"]
-
-        # insert results
-        rows = results_to_dict(training_id, results)
-        response = (
-            client.table("test_training_result")
-            .insert(rows)
-            .execute()
-        )
-
-    except Exception as e:
-        print(f"Error occurred while inserting results: {e}")
-        response = None
-
-    return client, training_id, response
-
-
-
-
 
 ### Permanent functions handling database operations for training runs and results ###
 
@@ -62,31 +20,48 @@ def database_login(user):
 
 
 # Insert a training run with related configuration details and produce a warning if the seed is already used with that configuration
-def initialize_training (client, seed, config, user_name):
-    # 1. Check_client
-    # 2. Check_data
-    # 3. Perform database operations
-    # 4. Return results
-    if not isinstance(client, Client):
-        raise TypeError("Expected a supabase client")
+def initialize_training (client, seed, config_id, user_name):
+    validate_client(client)
 
-    response = (
-        client.table("training_run")
-        .insert({"config_id": config, "run_by": user_name, "seed": seed, "start_time": datetime.now().isoformat()})
-        .select("training_id")
-        .execute()
-    )
+    # Check that parameters are ready to be inserted into the database
+    validate_integer(seed)
+    validate_string(config_id, "config_id", allow_space_in_string=False)
+    validate_string(user_name, "user_name",allow_space_in_string=True)
+
+    # Insert initialisation data into the database
+    try:
+        response = (
+            client.table("training_run")
+            .insert({"config_id": config_id, "run_by": user_name, "seed": seed, "start_time": datetime.now().isoformat()})
+            .select("training_id")
+            .execute()
+        )
+
+    except Exception as e:
+        print(f"Error occurred while initialising training run to database: {e}")
+
+    # Validate the data inserted into the database corresponds to the data returned by the database
+    validate_response(response.data[0]["config_id"], config_id, "config_id")
+    validate_response(response.data[0]["run_by"], user_name, "user_name")
+    validate_response(response.data[0]["seed"], seed, "seed")
+
     return response.data[0]['training_id']
 
 #Insert the results and update the status of the training run.
 def finalize_training (client, training_id, results, end_time):
     success_insert = False
     success_update = False
+
+    validate_client(client)
+
+    # Check that parameters are ready to be inserted into the database
+    validate_string(training_id, "training_id", allow_space_in_string=False)
+    validate_results(results)
+    validate_string(end_time, "end_time", allow_space_in_string=True)
+
     finalized_results = results_to_dict(training_id, results)
 
-    if not isinstance(client, Client):
-        raise TypeError("Expected a supabase client")
-
+    # Insert results to the database
     try:
         response_insert = (
                     client.table("training_result")
@@ -98,10 +73,13 @@ def finalize_training (client, training_id, results, end_time):
             success_insert = True
         else:
             print("The amount of rows added to the database does not fit with the amount of rows from the training")
-            print(f"Rows added: {len(response_insert)} \n Rows from training: {len(finalized_results)}")
+            print(f"Rows added: {len(response_insert.data)} \n Rows from training: {len(finalized_results)}")
             success_insert = False
+    except Exception as e:
+        print(f"Error occurred while inserting results to database: {e}")
 
-        
+    # Update the end time of the training.
+    try:
         response_update = (
                     client.table("training_run")
                     .update({"end_time": end_time})
@@ -113,17 +91,17 @@ def finalize_training (client, training_id, results, end_time):
             if  response_update.data[0]["training_id"] == training_id and response_update.data[0]["end_time"] == end_time.replace(tzinfo=timezone.utc):
                 success_update = True
             else:
-                print("The training ID and the end time does not match the row that got changed in the database")
-                print(response_update.data[0]["training_id"], training_id, response_update.data[0]["end_time"], end_time.replace(tzinfo=timezone.utc))
+                print("The training ID and/or the end time does not match the row that got changed in the database")
+                print(f"Training ID from training: {training_id}")
+                print(f"Training ID from database: {response_update.data[0]["training_id"]}")
+                print(f"End time from training: {end_time.replace(tzinfo=timezone.utc)}")
+                print(f"End time from database: {response_update.data[0]["end_time"]}")
                 success_update = False
         else:
-            print(f"{response_update.count} rows got updated when only 1 should")
+            print(f"{len(response_update.data)} rows got updated when only 1 should")
             success_update = False
-
     except Exception as e:
-        print(f"Error occurred while inserting results: {e}")
-        success_update = False
-        success_insert = False
+        print(f"Error occurred while updating end time to database: {e}")
     
     if success_update and success_insert:
         return True
