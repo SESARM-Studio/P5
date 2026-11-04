@@ -2,6 +2,8 @@ import argparse
 import csv
 import random
 import time
+from db_scripts.database_api import *
+from db_scripts.database_login import *
 
 import numpy as np
 import torch
@@ -11,6 +13,8 @@ from torchvision import datasets
 from torchvision.transforms import v2
 from torchvision.models import efficientnet_v2_s
 from torch.utils.data import Dataset
+
+
 
 """
 Main structure is inspired by PyTorch docs:
@@ -33,6 +37,7 @@ class IndexedDataset(Dataset):
         return x, y, img_id
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--training-id", required=True)
 parser.add_argument("-s", "--seed", type=int, required=True)
 parser.add_argument("-e", "--epochs", type=int, required=True)
 parser.add_argument("--csv-output", default="training_results.csv")
@@ -136,6 +141,7 @@ def test(dataloader, model, loss_fn, args, epoch):
 
 
 epoch_start = time.time();
+list_of_epochs_accuracy = []
 for epoch in range(args.epochs):
     epoch_time = time.time()
     print(f"\nEpoch {epoch}\n-------------------------------")
@@ -144,8 +150,13 @@ for epoch in range(args.epochs):
 
     print(f"Accuracy: {epoch_acc}, Avg loss: {epoch_loss}")
     print(f"Time: {time.time() - epoch_time}")
-    with open(f"{args.csv_output}", "a", newline='') as f:
-        csv.writer(f).writerow([args.seed, epoch, epoch_acc, epoch_loss, time.time() - epoch_time])
+
+    list_of_epochs_accuracy.append([epoch, epoch_acc])
+
+end_time = datetime.now().isoformat()
+
+client = setup_supabase_client()
+finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time)
 
 print("Done!")
 print(f"Total time: {time.time() - epoch_start}")
