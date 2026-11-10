@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
+from scipy.stats import skewnorm
 
-PDF_STEPSIZE = 0.1
+PDF_STEPSIZE = 0.05
 HISTOGRAM_BINS = 20
 
 supabase = create_supabase_connection()
@@ -28,9 +29,10 @@ print("Mean:", round(mean,2))
 print("std:", round(std,2))
 
 # Create points from min to max with stepsize 0.1 and calculate the y-values according to Guassian Distribution
-graph_xpdf = np.arange(min_accuracy, max_accuracy, PDF_STEPSIZE)
-graph_ypdf = (1 / (std * np.sqrt(2*np.pi))) * np.exp(-((graph_xpdf-mean)**2)/(2*std**2)) 
-
+graph_xpdf = np.arange(min_accuracy, max_accuracy+1, PDF_STEPSIZE)
+# graph_ypdf = (1 / (std * np.sqrt(2*np.pi))) * np.exp(-((graph_xpdf-mean)**2)/(2*std**2)) 
+shape, loc, scale = skewnorm.fit(list_accuracy_data)
+graph_ypdf = skewnorm.pdf(graph_xpdf, shape, loc, scale)
 fig, ax = plt.subplots()
 
 #Plot the histogram
