@@ -63,7 +63,7 @@ print(f"Empirical lower bound of top {top_x}% based on numpy's percentile functi
 print(f"Empirical lower bound of top {top_x}% by taking lowest value of top {num_best_seeds} results: {round(found_empirical_threshold,2)}")
 print(f"Theoretical lower bound of top {top_x}%: {round(theoretical_threshold,2)}")
 
-confidence_level = int(input("Calculating min sample size needed. What should the confidence level be: "))
+confidence_level = int(input("Calculating min sample size needed. What should the confidence level be as x%: "))
 
 min_sample_size = bernoulli_trial(top_x/100, confidence_level/100)
 
