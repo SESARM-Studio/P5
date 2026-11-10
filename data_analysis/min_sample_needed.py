@@ -47,24 +47,28 @@ print("Theoretical std:", round(theoretical_std,2))
 print("Theoretical skew:", round(theoretical_skew,2))
 
 print("\n --- Data analysis based on both empirical and theoretical ---")
-top_x = int(input("What top x percent should the seeds lie in: "))
+top_x_percent = int(input("What top x percent should the seeds lie in: "))
+top_x_decimal = top_x_percent/100
+complement_top_x_percent = 100-top_x_percent
+complement_top_x_decimal = 1.0-top_x_decimal
 
 # Calculate the value of the lower bound using 4 different methods.
-numpy_empirical_threshold = np.percentile(list_accuracy_data, 100-top_x)
-calculated_empirical_threshold = (max_accuracy-min_accuracy) * (100-top_x)/100 + min_accuracy
-theoretical_threshold = skewnorm.ppf(1.0-top_x/100, shape, loc, scale)
+numpy_empirical_threshold = np.percentile(list_accuracy_data, complement_top_x_percent)
+calculated_empirical_threshold = (max_accuracy-min_accuracy) * (complement_top_x_decimal) + min_accuracy
+theoretical_threshold = skewnorm.ppf(complement_top_x_decimal, shape, loc, scale)
 
-num_best_seeds = int(len(list_accuracy_data) * top_x/100)
+num_best_seeds = int(len(list_accuracy_data) * top_x_decimal)
 largest_x_best_seeds = heapq.nlargest(num_best_seeds, list_accuracy_data)  
 found_empirical_threshold = sorted(largest_x_best_seeds)[0]
 
-print(f"Empirical lower bound of top {top_x}% calculated on range from {min_accuracy} to {max_accuracy}: {round(calculated_empirical_threshold,2)} ")
-print(f"Empirical lower bound of top {top_x}% based on numpy's percentile function: {round(numpy_empirical_threshold,2)}")
-print(f"Empirical lower bound of top {top_x}% by taking lowest value of top {num_best_seeds} results: {round(found_empirical_threshold,2)}")
-print(f"Theoretical lower bound of top {top_x}%: {round(theoretical_threshold,2)}")
+print(f"Empirical lower bound of top {top_x_percent}% calculated on range from {min_accuracy} to {max_accuracy}: {round(calculated_empirical_threshold,2)} ")
+print(f"Empirical lower bound of top {top_x_percent}% based on numpy's percentile function: {round(numpy_empirical_threshold,2)}")
+print(f"Empirical lower bound of top {top_x_percent}% by taking lowest value of top {num_best_seeds} results: {round(found_empirical_threshold,2)}")
+print(f"Theoretical lower bound of top {top_x_percent}%: {round(theoretical_threshold,2)}")
 
-confidence_level = int(input("Calculating min sample size needed. What should the confidence level be as x%: "))
+confidence_level_percent = int(input("Calculating min sample size needed. What should the confidence level be as x%: "))
+confidence_level_decimal = confidence_level_percent/100
 
-min_sample_size = bernoulli_trial(top_x/100, confidence_level/100)
+min_sample_size = bernoulli_trial(top_x_decimal, confidence_level_decimal)
 
-print(f"You need to do atleast {min_sample_size} trials to, with a {confidence_level}% confidence, get a seed within the top {top_x}% of seeds")
+print(f"You need to do atleast {min_sample_size} trials to, with a {confidence_level_percent}% confidence, get a seed within the top {top_x_percent}% of seeds")
