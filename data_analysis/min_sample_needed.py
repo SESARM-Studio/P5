@@ -55,6 +55,7 @@ complement_top_x_decimal = 1.0-top_x_decimal
 # Calculate the value of the lower bound using 4 different methods.
 numpy_empirical_threshold = np.percentile(list_accuracy_data, complement_top_x_percent)
 calculated_empirical_threshold = (max_accuracy-min_accuracy) * (complement_top_x_decimal) + min_accuracy
+# Estimates the lower threshold using the Percent Point Function (ppf) which calculates the value of the percentile. It works left to right, that is why its the complement.
 estimated_threshold = skewnorm.ppf(complement_top_x_decimal, shape, loc, scale) 
 
 num_best_seeds = int(len(list_accuracy_data) * top_x_decimal)
