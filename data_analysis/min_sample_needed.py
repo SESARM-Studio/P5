@@ -53,19 +53,19 @@ complement_top_x_percent = 100-top_x_percent
 complement_top_x_decimal = 1.0-top_x_decimal
 
 # Calculate the value of the lower bound using 4 different methods.
-numpy_empirical_threshold = np.percentile(list_accuracy_data, complement_top_x_percent)
-interpolated_threshold = (max_accuracy-min_accuracy) * (complement_top_x_decimal) + min_accuracy
-# Estimates the lower threshold using the Percent Point Function (ppf) which calculates the value of the percentile. It works left to right, that is why its the complement.
-estimated_threshold = skewnorm.ppf(complement_top_x_decimal, shape, loc, scale) 
+numpy_empirical_lowbound = np.percentile(list_accuracy_data, complement_top_x_percent) # Takes into account the distribution of data.
+interpolated_lowbound = (max_accuracy-min_accuracy) * (complement_top_x_decimal) + min_accuracy # Assumes the data is uniformly distributed.
+# Estimates the lower bound using the Percent Point Function (ppf) which calculates the value of the percentile. It works left to right, that is why its the complement.
+estimated_lowbound = skewnorm.ppf(complement_top_x_decimal, shape, loc, scale) 
 
 num_top_seeds = int(len(list_accuracy_data) * top_x_decimal)
 top_seed_accuracies = heapq.nlargest(num_top_seeds, list_accuracy_data) # Make a list containing the accuracies of the top x seeds.
-empirical_threshold = sorted(top_seed_accuracies)[0] # Sort the list of accuracies in ascending order and take the lowest value.
+empirical_lowbound = sorted(top_seed_accuracies)[0] # Sort the list of accuracies in ascending order and take the lowest value.
 
-print(f"Empirical lower bound of top {top_x_percent}% calculated on range from {min_accuracy} to {max_accuracy}: {round(interpolated_threshold,2)} ")
-print(f"Empirical lower bound of top {top_x_percent}% based on numpy's percentile function: {round(numpy_empirical_threshold,2)}")
-print(f"Empirical lower bound of top {top_x_percent}% by taking lowest value of top {num_top_seeds} results: {round(empirical_threshold,2)}")
-print(f"Estimated lower bound of top {top_x_percent}%: {round(estimated_threshold,2)}")
+print(f"Empirical lower bound of top {top_x_percent}% calculated on range from {min_accuracy} to {max_accuracy}: {round(interpolated_lowbound,2)} ")
+print(f"Empirical lower bound of top {top_x_percent}% based on numpy's percentile function: {round(numpy_empirical_lowbound,2)}")
+print(f"Empirical lower bound of top {top_x_percent}% by taking lowest value of top {num_top_seeds} results: {round(empirical_lowbound,2)}")
+print(f"Estimated lower bound of top {top_x_percent}%: {round(estimated_lowbound,2)}")
 
 confidence_level_percent = float(input("Calculating min sample size needed. What should the confidence level be as x%: "))
 confidence_level_decimal = confidence_level_percent/100
