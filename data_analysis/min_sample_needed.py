@@ -54,17 +54,17 @@ complement_top_x_decimal = 1.0-top_x_decimal
 
 # Calculate the value of the lower bound using 4 different methods.
 numpy_empirical_threshold = np.percentile(list_accuracy_data, complement_top_x_percent)
-calculated_empirical_threshold = (max_accuracy-min_accuracy) * (complement_top_x_decimal) + min_accuracy
+interpolated_threshold = (max_accuracy-min_accuracy) * (complement_top_x_decimal) + min_accuracy
 # Estimates the lower threshold using the Percent Point Function (ppf) which calculates the value of the percentile. It works left to right, that is why its the complement.
 estimated_threshold = skewnorm.ppf(complement_top_x_decimal, shape, loc, scale) 
 
-num_best_seeds = int(len(list_accuracy_data) * top_x_decimal)
-largest_x_best_seeds = heapq.nlargest(num_best_seeds, list_accuracy_data)  
-found_empirical_threshold = sorted(largest_x_best_seeds)[0]
+num_top_seeds = int(len(list_accuracy_data) * top_x_decimal)
+top_seed_accuracies = heapq.nlargest(num_top_seeds, list_accuracy_data) # Make a list containing the accuracies of the top x seeds.
+empirical_threshold = sorted(top_seed_accuracies)[0] # Sort the list of accuracies in ascending order and take the lowest value.
 
-print(f"Empirical lower bound of top {top_x_percent}% calculated on range from {min_accuracy} to {max_accuracy}: {round(calculated_empirical_threshold,2)} ")
+print(f"Empirical lower bound of top {top_x_percent}% calculated on range from {min_accuracy} to {max_accuracy}: {round(interpolated_threshold,2)} ")
 print(f"Empirical lower bound of top {top_x_percent}% based on numpy's percentile function: {round(numpy_empirical_threshold,2)}")
-print(f"Empirical lower bound of top {top_x_percent}% by taking lowest value of top {num_best_seeds} results: {round(found_empirical_threshold,2)}")
+print(f"Empirical lower bound of top {top_x_percent}% by taking lowest value of top {num_top_seeds} results: {round(empirical_threshold,2)}")
 print(f"Estimated lower bound of top {top_x_percent}%: {round(estimated_threshold,2)}")
 
 confidence_level_percent = float(input("Calculating min sample size needed. What should the confidence level be as x%: "))
