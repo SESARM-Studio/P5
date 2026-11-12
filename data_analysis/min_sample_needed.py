@@ -47,7 +47,7 @@ print("Theoretical std:", round(theoretical_std,2))
 print("Theoretical skew:", round(theoretical_skew,2))
 
 print("\n --- Data analysis based on both empirical and theoretical ---")
-top_x_percent = int(input("What top x percent should the seeds lie in: "))
+top_x_percent = float(input("What top x percent should the seeds lie in: "))
 top_x_decimal = top_x_percent/100
 complement_top_x_percent = 100-top_x_percent
 complement_top_x_decimal = 1.0-top_x_decimal
@@ -66,7 +66,7 @@ print(f"Empirical lower bound of top {top_x_percent}% based on numpy's percentil
 print(f"Empirical lower bound of top {top_x_percent}% by taking lowest value of top {num_best_seeds} results: {round(found_empirical_threshold,2)}")
 print(f"Theoretical lower bound of top {top_x_percent}%: {round(theoretical_threshold,2)}")
 
-confidence_level_percent = int(input("Calculating min sample size needed. What should the confidence level be as x%: "))
+confidence_level_percent = float(input("Calculating min sample size needed. What should the confidence level be as x%: "))
 confidence_level_decimal = confidence_level_percent/100
 
 min_sample_size = bernoulli_trial(top_x_decimal, confidence_level_decimal)
