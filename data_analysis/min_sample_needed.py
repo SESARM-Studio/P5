@@ -23,15 +23,15 @@ list_accuracy_data *= 100 # Multiply decimal values to become percentage values
 # Calculate basic data analysis values
 min_accuracy = min(list_accuracy_data)
 max_accuracy = max(list_accuracy_data)
-mean = np.mean(list_accuracy_data)
-std = np.std(list_accuracy_data)
+empirical_mean = np.mean(list_accuracy_data)
+empirical_std = np.std(list_accuracy_data)
 empirical_skew = skew(list_accuracy_data)
 
 print(" --- Empirical based on results ---")
 print("Minimum accuracy:", min_accuracy)
 print("Maximum accuracy:", max_accuracy)
-print("Empirical mean:", round(mean,2))
-print("Empirical std:", round(std,2))
+print("Empirical mean:", round(empirical_mean,2))
+print("Empirical std:", round(empirical_std,2))
 print("Empirical skew:", round(empirical_skew,2))
 
 print("\n ---Estimated based on skew normal PDF ---")
