@@ -1,6 +1,6 @@
 from db_scripts.database_seed import get_seed
-from db_scripts.database_api import setup_supabase_client, initialize_training
-
+from db_scripts.database_api import initialize_training
+from db_scripts.database_login import setup_supabase_client
 import subprocess
 import time
 import argparse
@@ -15,6 +15,8 @@ SECONDS_BEFORE_RETRY = 30
 # User id is a required argument. The UID corresponds to the run_by column in the training_run table
 parser = argparse.ArgumentParser()
 parser.add_argument("--uid", required=True)
+parser.add_argument("--csv-output")
+parser.add_argument("--dist-output")
 args = parser.parse_args()
 
 # Determines the root dir as the parrents parrent directory of the file,
@@ -48,7 +50,7 @@ def main():
             exit(0)
 
         training_id = initialize_training(client, seed, temp_config_id, args.uid)
-        subprocess.run(['sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id)],
+        subprocess.run(['sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id), args.csv_output or "", args.dist_output or ""],
             cwd=PROJECT_ROOT,
             check=True,
         )

@@ -40,7 +40,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--training-id", required=True)
 parser.add_argument("-s", "--seed", type=int, required=True)
 parser.add_argument("-e", "--epochs", type=int, required=True)
-parser.add_argument("--csv-output", default="training_results.csv")
+parser.add_argument("--csv-output", default=None)
 parser.add_argument("--dist-output", default="distribution_results.csv")
 args = parser.parse_args()
 
@@ -151,12 +151,17 @@ for epoch in range(args.epochs):
     print(f"Accuracy: {epoch_acc}, Avg loss: {epoch_loss}")
     print(f"Time: {time.time() - epoch_time}")
 
-    list_of_epochs_accuracy.append([epoch, epoch_acc])
+    if args.csv_output is None:
+        list_of_epochs_accuracy.append([epoch, epoch_acc])
+    else:
+        with open(f"{args.csv_output}", "a", newline='') as f:
+            csv.writer(f).writerow([args.seed, epoch, epoch_acc, epoch_loss, time.time() - epoch_time])
 
 end_time = datetime.now().isoformat()
 
-client = setup_supabase_client()
-finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time)
+if args.csv_output is None:
+    client = setup_supabase_client()
+    finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time)
 
 print("Done!")
 print(f"Total time: {time.time() - epoch_start}")
