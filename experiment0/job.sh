@@ -43,8 +43,6 @@ singularity exec --nv --bind "$PROJECT_ROOT" --bind "$DATA_PATH:/data" "$CONTAIN
 	"$PYTHON" -m "$MODULE" \
 	--seed "$SEED" \
 	--epochs 60 \
-	--csv-output "$EXPERIMENT_DIR/outputs/output_$SEED.csv" \
-	--dist-output "$EXPERIMENT_DIR/outputs/pred_output_$SEED.csv" \
-	--training-id "$TRAINING_ID"
-  ${3:+--csv-output "$3"}
+	--training-id "$TRAINING_ID" \
+  ${3:+--csv-output "$3"} \
   ${4:+--dist-output "$4"}
