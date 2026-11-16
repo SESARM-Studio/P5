@@ -62,7 +62,11 @@ def main():
         if seed is None:
             exit(0)
 
-        training_id = initialize_training(client, seed, temp_config_id, args.uid)
+        if args.csv_output:
+            training_id = "local_csv"
+        else:
+            training_id = initialize_training(client, seed, temp_config_id, args.uid)
+
         subprocess.run(['sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id), args.csv_output or "", args.dist_output or ""],
             cwd=PROJECT_ROOT,
             check=True,
