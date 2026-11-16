@@ -6,7 +6,6 @@ import time
 import argparse
 from pathlib import Path
 import sys
-import os
 
 # How many jobs a user can queue at a time. The maximum is defined by AI LAB
 MAX_JOBS = 8
@@ -26,6 +25,20 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Setup for Supabase DB. Currently uses temporary config id, as the integration isn't yet complete
 temp_config_id = 'e4fecdcf-76a0-4e29-ae21-852decdd4513'
 client = setup_supabase_client()
+
+# Setup for local run (without DB)
+if args.csv_output:
+    seed_path = Path(__file__).parent / 'seeds.txt'
+    with open(seed_path, 'r') as file:
+        txt_seeds = [int(line.strip()) for line in file.readlines()]
+    txt_seeds.append(None)
+
+
+def new_seed():
+    if args.csv_output:
+        return get_seed(client)
+    else:
+        return txt_seeds.pop(0)
 
 def main():
     # Uses subprocess to run the slurm command squeue --me, to check users running jobs,
@@ -58,3 +71,4 @@ def main():
 while True:
     main()
     time.sleep(SECONDS_BEFORE_RETRY)
+
