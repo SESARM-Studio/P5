@@ -36,9 +36,9 @@ if args.csv_output:
 
 def new_seed():
     if args.csv_output:
-        return get_seed(client)
-    else:
         return txt_seeds.pop(0)
+    else:
+        return get_seed(client)
 
 def main():
     # Uses subprocess to run the slurm command squeue --me, to check users running jobs,
