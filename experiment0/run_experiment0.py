@@ -58,7 +58,7 @@ def main():
     # Uses subprocess to run the batch script job.sh with relevant arguemnts.
     print(f"{running_jobs} running jobs. Starting {loop_range}")
     for _ in range(loop_range):
-        seed = get_seed(client)
+        seed = new_seed()
         if seed is None:
             exit(0)
 
