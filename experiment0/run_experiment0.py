@@ -22,9 +22,7 @@ args = parser.parse_args()
 # because of the structure: root/experiment0/run_experiment0.py
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-# Setup for Supabase DB. Currently uses temporary config id, as the integration isn't yet complete
-temp_config_id = 'e4fecdcf-76a0-4e29-ae21-852decdd4513'
-client = setup_supabase_client()
+
 
 # Setup for local run (without DB)
 if args.csv_output:
@@ -32,6 +30,11 @@ if args.csv_output:
     with open(seed_path, 'r') as file:
         txt_seeds = [int(line.strip()) for line in file.readlines()]
     txt_seeds.append(None)
+
+# Setup for Supabase DB. Currently uses temporary config id, as the integration isn't yet complete
+else:
+    client = setup_supabase_client()
+temp_config_id = 'e4fecdcf-76a0-4e29-ae21-852decdd4513'
 
 
 def new_seed():
