@@ -11,7 +11,7 @@
 # Safety options, making sure the script exits at command fails and undefined variables
 set -euo pipefail
 
-PROJECT_ROOT="/ceph/project/p5_intelligent_seeds/P5"
+PROJECT_ROOT="$SLURM_SUBMIT_DIR"
 EXPERIMENT_DIR="$PROJECT_ROOT/experiment0"
 DATA_PATH="/ceph/project/p5_intelligent_seeds/data"
 MODULE="experiment0.experiment0"
