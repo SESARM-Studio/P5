@@ -13,7 +13,6 @@ result_epochs_no_query = query_distinct_training_epoch_no(supabase)
 list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query.data if "epoch_no" in row]
 last_epoch = max(list_epochs_no)
 
-
 # Prompt user for input
 experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3)"))
 
@@ -27,7 +26,6 @@ match experiment_choice:
         result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_3(supabase, last_epoch)
     case _:
         raise Exception("You have selected an invalid input")
-
 
 # result_last_epoch_accuracies.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
 list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies.data if "accuracy" in row])

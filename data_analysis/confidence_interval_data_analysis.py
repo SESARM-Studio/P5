@@ -26,8 +26,6 @@ match experiment_choice:
 #Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
 data_training_result.data.sort(key=sort_dict_by_epoch_no)
 data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
-    
-
 
 # Create a list of all columns (keys), so one can access the values of the dictionaries
 column_list = []
@@ -45,7 +43,6 @@ epochs.sort()
 epochs = np.array(epochs)
 epoch_start = min(epochs)
 epoch_end = max(epochs)
-
 
 # We take all the accuracies from the query, and store them in a numpy list
 # This enables the np.split function that takes arg1: a list and arg2: a number, and splits the list into a number of parts based on the number given 
@@ -74,7 +71,6 @@ for index in range(0,len(epochs)):
     lower_standard_deviation.append(mean[index]-standard_deviation[index])
     upper_standard_deviation.append(mean[index]+standard_deviation[index])
     
-
 # Setup the epochs that will be on the x-axis of the image for better visualisation (in this case epoch 1, 10, 20, ... , last epoch that mod 10 = 0)
 filter_array = []
 for epoch_no in epochs:
