@@ -18,19 +18,14 @@ match experiment_choice:
     case 1:
         data_training_result = query_training_result_experiment_1(supabase)
         #Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
-        data_training_result.data.sort(key=sort_dict_by_epoch_no)
-        data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
     case 2:
         data_training_result = query_training_result_experiment_2(supabase)
-        data_training_result.data.sort(key=sort_dict_by_epoch_no)
-        data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
     case 3:
         data_training_result = query_training_result_experiment_3(supabase)
-        data_training_result.data.sort(key=sort_dict_by_epoch_no)
-        data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
     case _:
         raise Exception("You have selected an invalid input")
-
+data_training_result.data.sort(key=sort_dict_by_epoch_no)
+data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
     
 
 
