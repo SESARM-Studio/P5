@@ -17,13 +17,13 @@ experiment_choice = int(input("From which experiment do you wish to retrieve dat
 match experiment_choice:
     case 1:
         data_training_result = query_training_result_experiment_1(supabase)
-        #Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
     case 2:
         data_training_result = query_training_result_experiment_2(supabase)
     case 3:
         data_training_result = query_training_result_experiment_3(supabase)
     case _:
         raise Exception("You have selected an invalid input")
+#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
 data_training_result.data.sort(key=sort_dict_by_epoch_no)
 data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
     
