@@ -10,14 +10,26 @@ def sort_dict_by_epoch_no(arg):
 #Establish supabase connection using our connection function from query_functions.py
 supabase = create_supabase_connection()
 
-# Retrieve the data using our query functions from query_functions.py
-data_test_training_result = query_test_training_result(supabase)
-data_test_training_result.data.sort(key=sort_dict_by_epoch_no)#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
+# Prompt user for input
+experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3)"))
+
+# Retrieve the data from a specific experiment using our query functions from query_functions.py
+match experiment_choice:
+    case 1:
+        data_training_result = query_training_result_experiment_1(supabase)
+    case 2:
+        data_training_result = query_training_result_experiment_2(supabase)
+    case 3:
+        data_training_result = query_training_result_experiment_3(supabase)
+    case _:
+        raise Exception("You have selected an invalid input")
+#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
+data_training_result.data.sort(key=sort_dict_by_epoch_no)
 data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
 
 # Create a list of all columns (keys), so one can access the values of the dictionaries
 column_list = []
-for column_name in data_test_training_result.data[FIRST_ROW]:
+for column_name in data_training_result.data[FIRST_ROW]:
     column_list.append(column_name)
 
 # Setup epoch datapoints for plotting:
@@ -32,11 +44,10 @@ epochs = np.array(epochs)
 epoch_start = min(epochs)
 epoch_end = max(epochs)
 
-
 # We take all the accuracies from the query, and store them in a numpy list
 # This enables the np.split function that takes arg1: a list and arg2: a number, and splits the list into a number of parts based on the number given 
 all_accuracies = []
-for dictionary in data_test_training_result.data:
+for dictionary in data_training_result.data:
     all_accuracies.append(dictionary.get("accuracy"))
 all_accuracies = np.array(all_accuracies)
 all_accuracies *= 100 # Multiply decimal values to become percentage values
@@ -60,7 +71,6 @@ for index in range(0,len(epochs)):
     lower_standard_deviation.append(mean[index]-standard_deviation[index])
     upper_standard_deviation.append(mean[index]+standard_deviation[index])
     
-
 # Setup the epochs that will be on the x-axis of the image for better visualisation (in this case epoch 1, 10, 20, ... , last epoch that mod 10 = 0)
 filter_array = []
 for epoch_no in epochs:

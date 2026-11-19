@@ -13,7 +13,20 @@ result_epochs_no_query = query_distinct_training_epoch_no(supabase)
 list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query.data if "epoch_no" in row]
 last_epoch = max(list_epochs_no)
 
-result_last_epoch_accuracies = query_last_training_epoch_accuracies(supabase, last_epoch)
+# Prompt user for input
+experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3)"))
+
+# Retrieve the data from a specific experiment using our query functions from query_functions.py
+match experiment_choice:
+    case 1:
+        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_1(supabase, last_epoch)
+    case 2:
+        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_2(supabase, last_epoch)
+    case 3:
+        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_3(supabase, last_epoch)
+    case _:
+        raise Exception("You have selected an invalid input")
+
 # result_last_epoch_accuracies.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
 list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies.data if "accuracy" in row])
 list_accuracy_data *= 100 # Multiply decimal values to become percentage values
