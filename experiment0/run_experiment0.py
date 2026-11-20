@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--uid", required=True)
 parser.add_argument("--csv-output")
 parser.add_argument("--dist-output")
+parser.add_argument("--seed-file", default="seeds.txt")
 args = parser.parse_args()
 
 # Determines the root dir as the parrents parrent directory of the file,
@@ -26,7 +27,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Setup for local run (without DB)
 if args.csv_output:
-    seed_path = Path(__file__).parent / 'seeds.txt'
+    seed_path = Path(__file__).parent / args.seed_file
     with open(seed_path, 'r') as file:
         txt_seeds = [int(line.strip()) for line in file.readlines()]
     txt_seeds.append(None)
