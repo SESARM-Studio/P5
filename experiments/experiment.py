@@ -37,7 +37,7 @@ class IndexedDataset(Dataset):
         return x, y, img_id
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--exp", required=True)
+parser.add_argument("--exp", required=True, type=int)
 parser.add_argument("--training-id", required=True)
 parser.add_argument("-s", "--seed", type=int, required=True)
 parser.add_argument("-e", "--epochs", type=int, required=True)
@@ -80,10 +80,10 @@ test_data = datasets.CIFAR10(
 seed = torch.Generator().manual_seed(args.seed)
 
 if args.exp == 3:
-    print("Experiment: ", args.exp)
+    print("Experiment three")
 
-    training_set_size = .8
-    validation_set_size = .2
+    training_set_size = 0.8
+    validation_set_size = 0.2
     train_set, validation_set = random_split(IndexedDataset(training_data),
                                              [training_set_size, validation_set_size], generator=seed)
 else:
@@ -143,9 +143,9 @@ def train(dataloader, model, loss_fn, optimizer):
         test_loss += loss_fn(pred, labels_in_batch).item()
         correct += (pred.argmax(1) == labels_in_batch).type(torch.float).sum().item()
 
-        avg_loss = test_loss / num_batches
-        accuracy = correct / size
-        return accuracy, avg_loss
+    avg_loss = test_loss / num_batches
+    accuracy = correct / size
+    return accuracy, avg_loss
 
 def validate(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
