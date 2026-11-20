@@ -7,8 +7,14 @@
 #SBATCH --mem=80G
 #SBATCH --time=12:00:00
 
-export SINGULARITY_TMPDIR=$HOME/.singularity/tmp
-export SINGULARITY_CACHEDIR=$HOME/.singularity/cache
+set -e
+cd $SLURM_SUBMIT_DIR
+# create temporary directory where singularity can store temporary files
+# and create a directory where singularity can store cached files
+export SINGULARITY_TMPDIR=$SLURM_SUBMIT_DIR/.singularity/tmp
+export SINGULARITY_CACHEDIR=$SLURM_SUBMIT_DIR/.singularity/cache
+
+# mkdir -p: make directories and parents (-p)
 mkdir -p $SINGULARITY_CACHEDIR $SINGULARITY_TMPDIR
 
 # The path to the definition file
