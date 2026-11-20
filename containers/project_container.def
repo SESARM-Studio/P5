@@ -1,0 +1,14 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%post
+	# This section is where you install software packages
+
+	# Update the package manager (apt)
+	apt update
+
+	# Install the latest Python and pip version
+	apt install -y python3.10 python3.10-dev python3-pip
+
+	# use pip to install torch
+	pip3 install torch torchvision python-dotenv supabase numpy pytest
