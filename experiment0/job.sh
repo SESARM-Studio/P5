@@ -11,11 +11,11 @@
 # Safety options, making sure the script exits at command fails and undefined variables
 set -euo pipefail
 
-PROJECT_ROOT="/ceph/project/p5_intelligent_seeds/P5"
+PROJECT_ROOT="$SLURM_SUBMIT_DIR"
 EXPERIMENT_DIR="$PROJECT_ROOT/experiment0"
 DATA_PATH="/ceph/project/p5_intelligent_seeds/data"
 MODULE="experiment0.experiment0"
-CONTAINER="/ceph/container/pytorch/pytorch_26.08.sif"
+CONTAINER="/ceph/project/p5_intelligent_seeds/project_container.sif"
 
 SEED="$1"
 TRAINING_ID="$2"
@@ -31,7 +31,7 @@ PYTHON="$PROJECT_ROOT/.venv/bin/python"
 # 2>/dev/null redirects stderr to /dev/null (virtual black hole).
 
 for try in {1..10}; do
-  singularity exec /ceph/container/pytorch/pytorch_26.08.sif true 2>/dev/null && break
+  singularity exec "$CONTAINER" true 2>/dev/null && break
   echo "Singularity failed (try $try), trying again in 200 seconds" >&2
   sleep 200
 done
@@ -40,9 +40,9 @@ done
 # --nv activates NVIDIA's GPUs. --bind "$DATA_PATH:/data" mounts the AI LAB pytorch container.
 # --bind "$PROJECT_ROOT" mounts the python virtual environment for the compute node. Could be a container later on
 singularity exec --nv --bind "$PROJECT_ROOT" --bind "$DATA_PATH:/data" "$CONTAINER" \
-	"$PYTHON" -m "$MODULE" \
+	python3 -m "$MODULE" \
 	--seed "$SEED" \
 	--epochs 60 \
-	--csv-output "$EXPERIMENT_DIR/outputs/output_$SEED.csv" \
-	--dist-output "$EXPERIMENT_DIR/outputs/pred_output_$SEED.csv" \
-	--training-id "$TRAINING_ID"
+	--training-id "$TRAINING_ID" \
+  ${3:+--csv-output "$3"} \
+  ${4:+--dist-output "$4"}

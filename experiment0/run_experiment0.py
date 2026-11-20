@@ -1,12 +1,11 @@
 from db_scripts.database_seed import get_seed
-from db_scripts.database_api import setup_supabase_client, initialize_training
-
+from db_scripts.database_api import initialize_training
+from db_scripts.database_login import setup_supabase_client
 import subprocess
 import time
 import argparse
 from pathlib import Path
 import sys
-import os
 
 # How many jobs a user can queue at a time. The maximum is defined by AI LAB
 MAX_JOBS = 8
@@ -15,15 +14,35 @@ SECONDS_BEFORE_RETRY = 30
 # User id is a required argument. The UID corresponds to the run_by column in the training_run table
 parser = argparse.ArgumentParser()
 parser.add_argument("--uid", required=True)
+parser.add_argument("--csv-output")
+parser.add_argument("--dist-output")
+parser.add_argument("--seed-file", default="seeds.txt")
 args = parser.parse_args()
 
 # Determines the root dir as the parrents parrent directory of the file,
 # because of the structure: root/experiment0/run_experiment0.py
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+
+
+# Setup for local run (without DB)
+if args.csv_output:
+    seed_path = Path(__file__).parent / args.seed_file
+    with open(seed_path, 'r') as file:
+        txt_seeds = [int(line.strip()) for line in file.readlines()]
+    txt_seeds.append(None)
+
 # Setup for Supabase DB. Currently uses temporary config id, as the integration isn't yet complete
+else:
+    client = setup_supabase_client()
 temp_config_id = 'e4fecdcf-76a0-4e29-ae21-852decdd4513'
-client = setup_supabase_client()
+
+
+def new_seed():
+    if args.csv_output:
+        return txt_seeds.pop(0)
+    else:
+        return get_seed(client)
 
 def main():
     # Uses subprocess to run the slurm command squeue --me, to check users running jobs,
@@ -43,12 +62,16 @@ def main():
     # Uses subprocess to run the batch script job.sh with relevant arguemnts.
     print(f"{running_jobs} running jobs. Starting {loop_range}")
     for _ in range(loop_range):
-        seed = get_seed(client)
+        seed = new_seed()
         if seed is None:
             exit(0)
 
-        training_id = initialize_training(client, seed, temp_config_id, args.uid)
-        subprocess.run(['sbatch','/ceph/project/p5_intelligent_seeds/P5/experiment0/job.sh', str(seed), str(training_id)],
+        if args.csv_output:
+            training_id = "local_csv"
+        else:
+            training_id = initialize_training(client, seed, temp_config_id, args.uid)
+
+        subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiment0' / 'job.sh'), str(seed), str(training_id), args.csv_output or "", args.dist_output or ""],
             cwd=PROJECT_ROOT,
             check=True,
         )
@@ -56,3 +79,4 @@ def main():
 while True:
     main()
     time.sleep(SECONDS_BEFORE_RETRY)
+
