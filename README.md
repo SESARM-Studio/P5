@@ -52,5 +52,9 @@ screen -S exp0
 cd /ceph/project/p5_intelligent_seeds/P5/
 .venv-login/bin/python -m experiment0.run_experiment0 --uid <Your name>
 ```
+To run the experiment local, disconnected from the database, use the argument ```--csv-output <path_to_file>```
+and specify an output location, and ````--seed-file <path_to_file.txt>```` to specify which seeds to run, seperated by newlines
+(default is seeds.txt in same directory as run_experiment0.py)
+
 ***Afterwards: Click Ctrl + A + D***
 Should return something like: [detached from 2341069.exp0]
