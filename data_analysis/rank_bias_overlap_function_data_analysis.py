@@ -53,16 +53,13 @@ def seed_rank_positions_across_epochs(data_flag: int):
   data_flag = 3 // experiment 3 data\n
   """
 
-  NO_EPOCHS = 60
+  EPOCHS_NO = 60
   SEED_COLUMN_NAME = "seed"
 
   no_seeds: int
   training_result_table_name: str
   accuracy_column_name: str
   query_function: function
-  seed_rank_positions: List[List[dict]]
-
-  result_data: any
 
   match data_flag:
     case 0:
@@ -89,26 +86,39 @@ def seed_rank_positions_across_epochs(data_flag: int):
       accuracy_column_name = "validation_accuracy"
       query_function = query_epoch_accuracies_experiment_3
 
-  query_data_raw = query_function(supabase=supabase, epoch=0).data
 
-  # Bring the raw data to the form:
-  # [{'seed': S, 'accuracy_name': A},...]
-  query_data = []
-  for i in range(len(query_data_raw)):
-    query_data.append({SEED_COLUMN_NAME: query_data_raw[i][SEED_COLUMN_NAME], accuracy_column_name: query_data_raw[i][training_result_table_name][0][accuracy_column_name]})
-
-  # Sorts on accuracy
-  query_data.sort(key=lambda row: row['accuracy'], reverse = True) # reverse enforces descending order7
-
-  epoch_ranking = []
-  for i in range(NO_EPOCHS):
-    for j in range(no_seeds):
-      # Index of seed in query_data (sorted by accuracy) is equal to its rank (index + 1)
-      #
-
-      epoch_ranking.append({SEED_COLUMN_NAME: query_data[SEED_COLUMN_NAME], 'rank': })
-    seed_rank_positions.append()
+  seed_rank_positions = []
+  for i in range(EPOCHS_NO):
+    query_data_raw = query_function(supabase=supabase, epoch=i).data
     epoch_ranking = []
+    
+    # Bring the raw data to the form:
+    # [{'seed': S, 'accuracy_name': A},...]
+    query_data = []
+    for k in range(len(query_data_raw)):
+      query_data.append({SEED_COLUMN_NAME: query_data_raw[k][SEED_COLUMN_NAME], accuracy_column_name: query_data_raw[k][training_result_table_name][0][accuracy_column_name]})
+  
+    # Sorts on accuracy
+    query_data.sort(key=lambda row: row[accuracy_column_name], reverse = True) # reverse enforces descending order
+
+    rank = 1
+    for j in range(no_seeds): # ret no_seeds til seeds_no - Spillemester Maren
+      # Index of seed in query_data (sorted by accuracy) is equal to its rank (index + 1)
+      # If two seeds have the same accuracy, they get the same rank. Dense rank is used, meaning:
+      # Seed: accuracy : rank
+      # S1: 0.7612 : 1
+      # S2: 0.7612 : 1
+      # S3: 0.7483 : 2 (and not 3 as in none-dense ranks)
+
+      rank = rank - 1 if (j > 0 and (query_data[j][accuracy_column_name] == query_data[j-1][accuracy_column_name])) else rank
+      epoch_ranking.append({SEED_COLUMN_NAME: query_data[j][SEED_COLUMN_NAME], 'rank': rank})
+      rank += 1
+
+    # Sorts on seed in ascending order
+    epoch_ranking.sort(key=lambda row: row['rank'])
+    seed_rank_positions.append(epoch_ranking)
+
+  return seed_rank_positions
      
 
           
