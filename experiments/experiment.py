@@ -80,11 +80,15 @@ test_data = datasets.CIFAR10(
 seed = torch.Generator().manual_seed(args.seed)
 
 if args.exp == 3:
+    print("Experiment: ", args.exp)
+
     training_set_size = .8
     validation_set_size = .2
     train_set, validation_set = random_split(IndexedDataset(training_data),
                                              [training_set_size, validation_set_size], generator=seed)
 else:
+    print("Experiment: ", args.exp)
+
     train_set = IndexedDataset(training_data)
     validation_set = None
 
@@ -143,7 +147,7 @@ def train(dataloader, model, loss_fn, optimizer):
         accuracy = correct / size
         return accuracy, avg_loss
 
-def validation(dataloader, model, loss_fn):
+def validate(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     model.eval()
@@ -189,12 +193,11 @@ for epoch in range(args.epochs):
     epoch_time = time.time()
     print(f"\nEpoch {epoch}\n-------------------------------")
     train_avg_acc, train_avg_loss = train(train_dataloader, model, loss_fn, optimizer)
-    val_avg_acc, val_avg_loss = validation(validation_dataloader, model, loss_fn)
-    test_avg_acc, test_avg_loss = test(test_dataloader, model, loss_fn, args, epoch)
-
-
     print(f"Training accuracy: {train_avg_acc}, Train avg loss: {train_avg_loss}")
-    print(f"Validation accuracy: {val_avg_acc}, Validation avg loss: {val_avg_loss}")
+    if validation_set is not None:
+        val_avg_acc, val_avg_loss = validate(validation_dataloader, model, loss_fn)
+        print(f"Validation accuracy: {val_avg_acc}, Validation avg loss: {val_avg_loss}")
+    test_avg_acc, test_avg_loss = test(test_dataloader, model, loss_fn, args, epoch)
     print(f"Testing accuracy: {test_avg_acc}, Testing Avg loss: {test_avg_loss}")
 
 
