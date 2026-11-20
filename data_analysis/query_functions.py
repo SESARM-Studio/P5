@@ -55,7 +55,7 @@ def query_epoch_accuracies_experiment_1(supabase, epoch):
 
     return (
         supabase.from_("training_run")
-        .select("training_id, seed, training_result(training_id, epoch_no, accuracy)")
+        .select("seed, training_result(epoch_no, accuracy)")
         .eq("training_result.epoch_no", epoch)
         .lt("seed", EXPERIMENT_1_SEED_UPPER_BOUND+1)
         .order("seed", desc=False)
@@ -69,7 +69,7 @@ def query_epoch_accuracies_experiment_2_300_seeds(supabase, epoch):
 
     return (
         supabase.from_("training_run")
-        .select("training_id, seed, training_result(training_id, epoch_no, accuracy)")
+        .select("seed, training_result(epoch_no, accuracy)")
         .eq("training_result.epoch_no", epoch)
         .gt("seed", EXPERIMENT_1_SEED_UPPER_BOUND)
         .order("seed", desc=False)
@@ -84,7 +84,7 @@ def query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch):
 
     return (
         supabase.from_("training_run")
-        .select("training_id, seed, training_result(training_id, epoch_no, accuracy)")
+        .select("seed, training_result(epoch_no, accuracy)")
         .eq("training_result.epoch_no", epoch)
         .order("seed", desc=False)
         .execute()
@@ -97,7 +97,7 @@ def query_epoch_accuracies_experiment_3(supabase, epoch):
 
     return (
         supabase.from_("training_run")
-        .select("training_id, seed, training_result_convergence(training_id, epoch_no, validation_accuracy)")
+        .select("seed, training_result_convergence(epoch_no, validation_accuracy)")
         .eq("training_result_convergence.epoch_no", epoch)
         .order("seed", desc=False)
         .execute()
