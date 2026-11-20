@@ -37,7 +37,7 @@ def plot_seed_rank_positions_across_epochs(seed_rank_positions: List[List[int]],
 
   for i in range(len(seed_rank_positions)):
     for j in range(len(seed_rank_positions[i])):
-      plt.step(seed_rank_positions[], z, where="mid", linewidth=2, label=i+1)
+      plt.step(seed_rank_positions, z, where="mid", linewidth=2, label=i+1)
 
   plt.legend()
   plt.show()
@@ -52,7 +52,66 @@ def seed_rank_positions_across_epochs(data_flag: int):
   data_flag = 2 // experiment 2 (all 500 seeds) data\n
   data_flag = 3 // experiment 3 data\n
   """
-  print("hej")
+
+  NO_EPOCHS = 60
+  SEED_COLUMN_NAME = "seed"
+
+  no_seeds: int
+  training_result_table_name: str
+  accuracy_column_name: str
+  query_function: function
+  seed_rank_positions: List[List[dict]]
+
+  result_data: any
+
+  match data_flag:
+    case 0:
+      no_seeds = 200
+      training_result_table_name = "training_result"
+      accuracy_column_name = "accuracy"
+      query_function = query_epoch_accuracies_experiment_1
+    
+    case 1:
+      no_seeds = 300
+      training_result_table_name = "training_result"
+      accuracy_column_name = "accuracy"
+      query_function = query_epoch_accuracies_experiment_2_300_seeds
+
+    case 2:
+      no_seeds = 300
+      training_result_table_name = "training_result"
+      accuracy_column_name = "accuracy"
+      query_function = query_epoch_accuracies_experiment_2_500_seeds
+
+    case 3:
+      no_seeds = 200
+      training_result_table_name = "training_result_convergence"
+      accuracy_column_name = "validation_accuracy"
+      query_function = query_epoch_accuracies_experiment_3
+
+  query_data_raw = query_function(supabase=supabase, epoch=0).data
+
+  # Bring the raw data to the form:
+  # [{'seed': S, 'accuracy_name': A},...]
+  query_data = []
+  for i in range(len(query_data_raw)):
+    query_data.append({SEED_COLUMN_NAME: query_data_raw[i][SEED_COLUMN_NAME], accuracy_column_name: query_data_raw[i][training_result_table_name][0][accuracy_column_name]})
+
+  # Sorts on accuracy
+  query_data.sort(key=lambda row: row['accuracy'], reverse = True) # reverse enforces descending order7
+
+  epoch_ranking = []
+  for i in range(NO_EPOCHS):
+    for j in range(no_seeds):
+      # Index of seed in query_data (sorted by accuracy) is equal to its rank (index + 1)
+      #
+
+      epoch_ranking.append({SEED_COLUMN_NAME: query_data[SEED_COLUMN_NAME], 'rank': })
+    seed_rank_positions.append()
+    epoch_ranking = []
+     
+
+          
 
 
 def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int, p: float):
@@ -162,4 +221,5 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
 
 #print(rbo_between_specific_epochs(39,59,0))
 
-plot_seed_rank_positions_across_epochs(0)
+seed_rank_positions_across_epochs(0)
+#plot_seed_rank_positions_across_epochs(0)
