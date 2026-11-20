@@ -8,11 +8,11 @@ from db_scripts.database_login import *
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import datasets
 from torchvision.transforms import v2
 from torchvision.models import efficientnet_v2_s
-from torch.utils.data import Dataset
+
 
 
 
@@ -37,6 +37,7 @@ class IndexedDataset(Dataset):
         return x, y, img_id
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--exp", required=True)
 parser.add_argument("--training-id", required=True)
 parser.add_argument("-s", "--seed", type=int, required=True)
 parser.add_argument("-e", "--epochs", type=int, required=True)
@@ -57,6 +58,8 @@ torch.use_deterministic_algorithms(True)
 
 TENSOR_MEAN_CHANNELS = (0.5, 0.5, 0.5)
 TENSOR_STD_CHANNELS = (0.5, 0.5, 0.5)
+BATCH_SIZE = 64
+NUM_WORKERS = 8
 
 training_data = datasets.CIFAR10(
     root="/data",
@@ -74,10 +77,24 @@ test_data = datasets.CIFAR10(
         [v2.ToImage(), v2.ToDtype(torch.float32, scale=True), v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
 )
 
-BATCH_SIZE = 64
-NUM_WORKERS = 8
-train_dataloader = DataLoader(IndexedDataset(training_data), batch_size=BATCH_SIZE,
+seed = torch.Generator().manual_seed(args.seed)
+
+if args.exp == 3:
+    training_set_size = .8
+    validation_set_size = .2
+    train_set, validation_set = random_split(IndexedDataset(training_data),
+                                             [training_set_size, validation_set_size], generator=seed)
+else:
+    train_set = IndexedDataset(training_data)
+    validation_set = None
+
+train_dataloader = DataLoader(train_set, batch_size=BATCH_SIZE,
                               shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+
+validation_dataloader = DataLoader(validation_set, batch_size=BATCH_SIZE*2,
+                               shuffle=False, num_workers=NUM_WORKERS, pin_memory=True) \
+    if validation_set is not None else None
+
 test_dataloader = DataLoader(IndexedDataset(test_data), batch_size=BATCH_SIZE,
                              shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
 
@@ -102,7 +119,10 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
 def train(dataloader, model, loss_fn, optimizer):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
     model.train()
+    test_loss, correct = 0, 0
     for X, labels_in_batch, _ in dataloader:
         X, labels_in_batch = X.to(device), labels_in_batch.to(device)
 
@@ -114,6 +134,30 @@ def train(dataloader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
+
+        # Save correct and loss for avg accuracy and loss
+        test_loss += loss_fn(pred, labels_in_batch).item()
+        correct += (pred.argmax(1) == labels_in_batch).type(torch.float).sum().item()
+
+        avg_loss = test_loss / num_batches
+        accuracy = correct / size
+        return accuracy, avg_loss
+
+def validation(dataloader, model, loss_fn):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    model.eval()
+    test_loss, correct = 0, 0
+    with torch.no_grad():
+        for X, labels_in_batch, image_ids_in_batch in dataloader:
+            X, labels_in_batch = X.to(device), labels_in_batch.to(device)
+            pred = model(X)
+            test_loss += loss_fn(pred, labels_in_batch).item()
+            correct += (pred.argmax(1) == labels_in_batch).type(torch.float).sum().item()
+
+    avg_loss = test_loss / num_batches
+    accuracy = correct / size
+    return accuracy, avg_loss
 
 def test(dataloader, model, loss_fn, args, epoch):
     size = len(dataloader.dataset)
@@ -139,23 +183,28 @@ def test(dataloader, model, loss_fn, args, epoch):
     accuracy = correct / size
     return accuracy, avg_loss
 
-
 epoch_start = time.time();
 list_of_epochs_accuracy = []
 for epoch in range(args.epochs):
     epoch_time = time.time()
     print(f"\nEpoch {epoch}\n-------------------------------")
-    train(train_dataloader, model, loss_fn, optimizer)
-    epoch_acc, epoch_loss = test(test_dataloader, model, loss_fn, args, epoch)
+    train_avg_acc, train_avg_loss = train(train_dataloader, model, loss_fn, optimizer)
+    val_avg_acc, val_avg_loss = validation(validation_dataloader, model, loss_fn)
+    test_avg_acc, test_avg_loss = test(test_dataloader, model, loss_fn, args, epoch)
 
-    print(f"Accuracy: {epoch_acc}, Avg loss: {epoch_loss}")
+
+    print(f"Training accuracy: {train_avg_acc}, Train avg loss: {train_avg_loss}")
+    print(f"Validation accuracy: {val_avg_acc}, Validation avg loss: {val_avg_loss}")
+    print(f"Testing accuracy: {test_avg_acc}, Testing Avg loss: {test_avg_loss}")
+
+
     print(f"Time: {time.time() - epoch_time}")
 
     if args.csv_output is None:
-        list_of_epochs_accuracy.append([epoch, epoch_acc])
+        list_of_epochs_accuracy.append([epoch, train_avg_acc])
     else:
         with open(f"{args.csv_output}", "a", newline='') as f:
-            csv.writer(f).writerow([args.seed, epoch, epoch_acc, epoch_loss, time.time() - epoch_time])
+            csv.writer(f).writerow([args.seed, epoch, train_avg_acc, train_avg_loss, val_avg_acc, val_avg_loss, test_avg_acc, test_avg_loss, time.time() - epoch_time])
 
 end_time = datetime.now().isoformat()
 

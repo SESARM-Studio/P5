@@ -12,9 +12,9 @@
 set -euo pipefail
 
 PROJECT_ROOT="$SLURM_SUBMIT_DIR"
-EXPERIMENT_DIR="$PROJECT_ROOT/experiment0"
+EXPERIMENT_DIR="$PROJECT_ROOT/experiments"
 DATA_PATH="/ceph/project/p5_intelligent_seeds/data"
-MODULE="experiment0.experiment0"
+MODULE="experiments.experiment"
 CONTAINER="/ceph/project/p5_intelligent_seeds/project_container.sif"
 
 SEED="$1"

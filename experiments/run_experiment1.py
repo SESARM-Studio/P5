@@ -20,7 +20,7 @@ parser.add_argument("--seed-file", default="seeds.txt")
 args = parser.parse_args()
 
 # Determines the root dir as the parrents parrent directory of the file,
-# because of the structure: root/experiment0/run_experiment0.py
+# because of the structure: root/experiments/run_experiment1.py
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -71,7 +71,7 @@ def main():
         else:
             training_id = initialize_training(client, seed, temp_config_id, args.uid)
 
-        subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiment0' / 'job.sh'), str(seed), str(training_id), args.csv_output or "", args.dist_output or ""],
+        subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiments' / 'job.sh'), str(seed), str(training_id), args.csv_output or "", args.dist_output or ""],
             cwd=PROJECT_ROOT,
             check=True,
         )
