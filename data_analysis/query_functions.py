@@ -28,7 +28,7 @@ def query_training_result_experiment(supabase, experiment_nr):
     else:
         response = (
             supabase.table("training_run")
-            .select("training_result(training_id, epoch_no, accuracy)")
+            .select("training_result(*)")
             .eq("experiment_nr", experiment_nr)
             .execute()
         )
