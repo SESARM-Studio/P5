@@ -1,8 +1,11 @@
 import numpy as np
-from query_functions import create_supabase_connection, query_distinct_training_epoch_no, query_last_training_epoch_accuracies
+from query_functions import create_supabase_connection, query_distinct_training_epoch_no, query_training_epoch_accuracies_experiment
 from scipy.stats import skewnorm
 from scipy.stats import skew
 import heapq
+
+FIRST_EXPERIMENT_NR = 1
+LAST_EXPERIMENT_NR = 3
 
 def bernoulli_trial(success_probability, confidence):
     min_sample_size = np.ceil(np.log(1-confidence) / np.log(1-success_probability))
@@ -12,25 +15,23 @@ supabase = create_supabase_connection()
 
 # Query the database to get a list of dictionaries with epochs number
 result_epochs_no_query = query_distinct_training_epoch_no(supabase)
-list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query.data if "epoch_no" in row]
+list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query if "epoch_no" in row]
 last_epoch = max(list_epochs_no)
 
 # Prompt user for input
-experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3)"))
+valid_input = False
+while valid_input == False:
+    experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3): "))
+    if experiment_choice < FIRST_EXPERIMENT_NR or experiment_choice > LAST_EXPERIMENT_NR:
+        print("Invalid input.")
+    else:
+        valid_input = True
 
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
-match experiment_choice:
-    case 1:
-        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_1(supabase, last_epoch)
-    case 2:
-        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_2(supabase, last_epoch)
-    case 3:
-        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_3(supabase, last_epoch)
-    case _:
-        raise Exception("You have selected an invalid input")
+result_last_epoch_accuracies = query_training_epoch_accuracies_experiment(supabase, last_epoch, experiment_choice)
 
-# result_last_epoch_accuracies.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
-list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies.data if "accuracy" in row])
+# result_last_epoch_accuracies contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
+list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies if "accuracy" in row])
 list_accuracy_data *= 100 # Multiply decimal values to become percentage values
 
 # Calculate basic data analysis values
