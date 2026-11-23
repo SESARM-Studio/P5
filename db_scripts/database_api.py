@@ -2,20 +2,22 @@ from datetime import datetime, timezone
 from db_scripts.validation import validate_integer, validate_client, validate_results, validate_string, validate_response
 
 ### Database API ###
-
-# temporary functions to insert results into the database
-def results_to_dict(training_id, results):
-    return [
-        {"training_id": training_id, "epoch_no": epoch, "accuracy": accuracy}
-        for epoch, accuracy in results
-    ]
-
-### Permanent functions handling database operations for training runs and results ###
+def results_to_dict(training_id, results, experiment_no):
+    if experiment_no == 3:
+        return [
+            {"training_id": training_id, "epoch_no": epoch, "test_accuracy": test_accuracy, "validation_accuracy": validation_accuracy, "training_accuracy": training_accuracy, "validation_loss": validation_loss, "training_loss": training_loss, "test_loss": test_loss}
+            for epoch, test_accuracy, validation_accuracy, training_accuracy, validation_loss, training_loss, test_loss in results
+        ]
+    else:
+        return [
+            {"training_id": training_id, "epoch_no": epoch, "accuracy": accuracy}
+            for epoch, accuracy in results
+        ]
 
 # Login to the database
 def database_login(user):
     client = None
-    #Ensure proper login with correct permissions
+    # Ensure proper login with correct permissions
     return client
 
 
@@ -48,8 +50,8 @@ def initialize_training (client, seed, config_id, user_name):
 
     return result['training_id']
 
-#Insert the results and update the status of the training run.
-def finalize_training (client, training_id, results, end_time):
+# Insert the results and update the status of the training run.
+def finalize_training (client, training_id, results, end_time, experiment_no):
     success_insert = False
     success_update = False
 
@@ -60,12 +62,13 @@ def finalize_training (client, training_id, results, end_time):
     validate_results(results)
     validate_string(end_time, "end_time", allow_space_in_string=True)
 
-    finalized_results = results_to_dict(training_id, results)
+    finalized_results = results_to_dict(training_id, results, experiment_no)
 
     # Insert results to the database
+    table_name = "training_result_convergence" if experiment_no == 3 else "training_result"
     try:
         response_insert = (
-                    client.table("training_result")
+                    client.table(table_name)
                     .insert(finalized_results)
                     .execute()
                 )
@@ -110,7 +113,7 @@ def finalize_training (client, training_id, results, end_time):
     else:
         return False
 
-#Must return a list with the final accuracy of all finalized experiments with a unique pair of configuration and seed and produce a warning if there are experiments that are not yet finalized.
+# Must return a list with the final accuracy of all finalized experiments with a unique pair of configuration and seed and produce a warning if there are experiments that are not yet finalized.
 def collect_final_results (client):
     results = []  
     
