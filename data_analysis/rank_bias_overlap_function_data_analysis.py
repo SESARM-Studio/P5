@@ -16,7 +16,7 @@ SEEDS_NO_EXPERIMENT_3 = 200
 SEED_COLUMN_NAME = "seed"
 
 
-def plot_seed_rank_positions_across_epochs(seed_range: List[int], seed_rank_positions: List[List[dict]], data_flag: int):
+def plot_seed_rank_positions_across_epochs(seed_rank_positions: List[List[dict]], data_flag: int):
   """
   Returns a 2D array that contains the rank position of each seed for each epoch.\n
   --------------
@@ -31,35 +31,26 @@ def plot_seed_rank_positions_across_epochs(seed_range: List[int], seed_rank_posi
   match data_flag:
     case 0:
       epochs_no = EPOCHS_NO_STNDRD
-      seeds_no = SEEDS_NO_EXPERIMENT_1
 
     case 1:
-          epochs_no = EPOCHS_NO_STNDRD
-          seeds_no = SEEDS_NO_EXPERIMENT_2_NEW
+      epochs_no = EPOCHS_NO_STNDRD
 
     case 2:
       epochs_no = EPOCHS_NO_STNDRD
-      seeds_no = SEEDS_NO_EXPERIMENT_2_TOTAL
     
     case 3:
       epochs_no = EPOCHS_NO_EXPERIMENT_3
-      seeds_no = SEEDS_NO_EXPERIMENT_3
 
+  # Use ranking data for epoch 0 to define number of included seed (must be the same across all epochs)
+  seeds_no = len(seed_rank_positions[0]) 
 
   # Generate plots for each seed rank across epochs
   epoch_x_values = list(range(epochs_no))
-  for seed in seed_range:
+  for seed in range(seeds_no):
     rank_y_values = []
     for epoch in range(epochs_no):
       rank_y_values.append(seed_rank_positions[epoch][seed]['rank'])
-    plt.step(epoch_x_values, rank_y_values, where="mid", linewidth=2, label="seed " + str(seed+1))
-
-
-  # x = [1,2,3,4,5,6,6]
-  # z = [2,123,3,1,31,2,67]
-  # plt.step(x, z, where="mid", linewidth=2, label="S1")
-  # z = [123,4,342,23,2,4,9]
-  # plt.step(x, z, where="mid", linewidth=2, label="S2")
+    plt.step(epoch_x_values, rank_y_values, where="mid", linewidth=2, label="seed " + str(seed_rank_positions[epoch][seed]['seed']))
 
   plt.legend()
   plt.show()
@@ -247,6 +238,85 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   return pta.rbo(df_a, df_b, p)
 
 
+def main():
+
+  analysis_choice: int
+  dataset_choice: int
+  seed_range_choice: int
+  seed_selection = List[int]
+  ranking_approach_choice: bool
+
+  # Choose analysis
+  while(True):
+    print("Choose an analysis")
+    print("""
+        0. Rank seeds over epochs\n
+        1. Compare epochs on seed rankings\n
+      """)
+    analysis_choice = int(input())
+    if analysis_choice not in [0,1]:
+      continue
+    else:
+      break
+
+  # Choose dataset
+  while(True):
+      print("Choose dataset")
+      print("""
+          0. Experiment 1\n
+          1. Experiment 2 (300 new seeds)\n
+          2. Experiment 2 (all 500 seeds)\n
+          3. Experiment 3
+        """)
+      dataset_choice = int(input())
+      if dataset_choice not in [0,1,2,3]:
+        continue
+      else:
+        break
+
+  if (analysis_choice) == 0: # Rank seeds through all epochs
+    while(True):
+      print("Choose seed range")
+      print("""
+          0. All in dataset\n
+          1. Specify specific seeds\n
+        """)
+      seed_range_choice = int(input())
+      if seed_range_choice not in [0,1]:
+        continue
+      else:
+        break
+
+    if (seed_range_choice == 1):
+      print("Specify seeds in this format: 1,7,9,13,...")
+      seed_selection_input = str(input())
+      seed_selection = [int(seed) for seed in seed_selection_input.split(',')]
+    else:
+      seed_selection = []
+
+    while(True):
+      print("Choose ranking approach")
+      print("""
+          0. Rank compared to all seeds in dataset\n
+          1. Rank relative to selected seeds\n
+        """)
+      ranking_approach_choice_input = int(input())
+      if ranking_approach_choice_input not in [0,1]:
+        continue
+      else:
+        break
+
+    ranking_approach_choice = True if ranking_approach_choice_input == 1 else False
+
+    seed_rank_positions = seed_rank_positions_across_epochs(dataset_choice, ranking_approach_choice, seed_selection)
+    plot_seed_rank_positions_across_epochs(seed_rank_positions, dataset_choice)
+
+  else: # Compare epochs rankings
+    print("hey")
+    
+main()
+
+
 
 ##### TESTING YARD ##### 
 # hip = ["1","32","2","45","8","3"]
@@ -263,5 +333,5 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
 
 #print(rbo_between_specific_epochs(39,59,0))
 
-seed_rank_positions = seed_rank_positions_across_epochs(0, True, [1,7,9,13])
+#seed_rank_positions = seed_rank_positions_across_epochs(0, True, [1,7,9,13])
 #plot_seed_rank_positions_across_epochs([1],seed_rank_positions,0)
