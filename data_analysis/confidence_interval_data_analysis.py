@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
+from prompt_functions import prompt_user
 
 FIRST_ROW = 0
 FIRST_EXPERIMENT_NO = 1
@@ -13,13 +14,7 @@ def sort_dict_by_epoch_no(arg):
 supabase = create_supabase_connection()
 
 # Prompt user for input
-valid_input = False
-while valid_input == False:
-    experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3): "))
-    if experiment_choice < FIRST_EXPERIMENT_NO or experiment_choice > LAST_EXPERIMENT_NO:
-        print("Invalid input.")
-    else:
-        valid_input = True
+experiment_choice = prompt_user(FIRST_EXPERIMENT_NO, LAST_EXPERIMENT_NO)
 
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
 data_training_result = query_training_result_experiment(supabase, experiment_choice)

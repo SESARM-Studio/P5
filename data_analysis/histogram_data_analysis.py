@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
 from scipy.stats import skewnorm
+from prompt_functions import prompt_user
 
 PDF_STEPSIZE = 0.05 # The stepsize for the np.arange x-values for the pdf.
 HISTOGRAM_BINS = 20
@@ -16,13 +17,7 @@ list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query if "epoch_no
 last_epoch = max(list_epochs_no)
 
 # Prompt user for input
-valid_input = False
-while valid_input == False:
-    experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3): "))
-    if experiment_choice < FIRST_EXPERIMENT_NO or experiment_choice > LAST_EXPERIMENT_NO:
-        print("Invalid input.")
-    else:
-        valid_input = True
+experiment_choice = prompt_user(FIRST_EXPERIMENT_NO, LAST_EXPERIMENT_NO)
 
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
 result_last_epoch_accuracies = query_training_epoch_accuracies_experiment(supabase, last_epoch, experiment_choice)

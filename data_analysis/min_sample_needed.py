@@ -1,8 +1,9 @@
 import numpy as np
+import heapq
 from query_functions import create_supabase_connection, query_distinct_training_epoch_no, query_training_epoch_accuracies_experiment
+from prompt_functions import prompt_user
 from scipy.stats import skewnorm
 from scipy.stats import skew
-import heapq
 
 FIRST_EXPERIMENT_NO = 1
 LAST_EXPERIMENT_NO = 3
@@ -19,13 +20,7 @@ list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query if "epoch_no
 last_epoch = max(list_epochs_no)
 
 # Prompt user for input
-valid_input = False
-while valid_input == False:
-    experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3): "))
-    if experiment_choice < FIRST_EXPERIMENT_NO or experiment_choice > LAST_EXPERIMENT_NO:
-        print("Invalid input.")
-    else:
-        valid_input = True
+experiment_choice = prompt_user(FIRST_EXPERIMENT_NO, LAST_EXPERIMENT_NO)
 
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
 result_last_epoch_accuracies = query_training_epoch_accuracies_experiment(supabase, last_epoch, experiment_choice)
