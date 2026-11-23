@@ -5,8 +5,8 @@ from scipy.stats import skewnorm
 
 PDF_STEPSIZE = 0.05 # The stepsize for the np.arange x-values for the pdf.
 HISTOGRAM_BINS = 20
-FIRST_EXPERIMENT_NR = 1
-LAST_EXPERIMENT_NR = 3
+FIRST_EXPERIMENT_NO = 1
+LAST_EXPERIMENT_NO = 3
 
 supabase = create_supabase_connection()
 
@@ -19,7 +19,7 @@ last_epoch = max(list_epochs_no)
 valid_input = False
 while valid_input == False:
     experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3): "))
-    if experiment_choice < FIRST_EXPERIMENT_NR or experiment_choice > LAST_EXPERIMENT_NR:
+    if experiment_choice < FIRST_EXPERIMENT_NO or experiment_choice > LAST_EXPERIMENT_NO:
         print("Invalid input.")
     else:
         valid_input = True

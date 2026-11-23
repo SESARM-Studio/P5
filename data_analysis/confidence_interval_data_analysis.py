@@ -3,8 +3,8 @@ import numpy as np
 from query_functions import *
 
 FIRST_ROW = 0
-FIRST_EXPERIMENT_NR = 1
-LAST_EXPERIMENT_NR = 3
+FIRST_EXPERIMENT_NO = 1
+LAST_EXPERIMENT_NO = 3
 
 def sort_dict_by_epoch_no(arg):
     return arg['epoch_no']
@@ -16,7 +16,7 @@ supabase = create_supabase_connection()
 valid_input = False
 while valid_input == False:
     experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3): "))
-    if experiment_choice < FIRST_EXPERIMENT_NR or experiment_choice > LAST_EXPERIMENT_NR:
+    if experiment_choice < FIRST_EXPERIMENT_NO or experiment_choice > LAST_EXPERIMENT_NO:
         print("Invalid input.")
     else:
         valid_input = True
