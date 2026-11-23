@@ -47,14 +47,14 @@ shape, loc, scale = skewnorm.fit(list_accuracy_data)
 graph_ypdf = skewnorm.pdf(graph_xpdf, shape, loc, scale)
 fig, ax = plt.subplots()
 
-#Plot the histogram
+# Plot the histogram
 histogram_style = {"facecolor": "lightblue", "edgecolor": "white", "linewidth": 1 }
 ax.hist(list_accuracy_data, bins=HISTOGRAM_BINS, density=True, **histogram_style)
 
-#Plot the probability distribution function
+# Plot the probability distribution function
 ax.plot(graph_xpdf, graph_ypdf)
 
-#Plot every data accuracy at the bottom of the graph as vertical lines
+# Plot every data accuracy at the bottom of the graph as vertical lines
 plot_style = {"color": "darkblue", "marker": "|", "markersize": 20}
 y_zeroes = 0*list_accuracy_data
 ax.plot(list_accuracy_data, y_zeroes, **plot_style)

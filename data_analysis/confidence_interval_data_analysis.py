@@ -9,7 +9,7 @@ LAST_EXPERIMENT_NR = 3
 def sort_dict_by_epoch_no(arg):
     return arg['epoch_no']
 
-#Establish supabase connection using our connection function from query_functions.py
+# Establish supabase connection using our connection function from query_functions.py
 supabase = create_supabase_connection()
 
 # Prompt user for input
@@ -24,7 +24,7 @@ while valid_input == False:
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
 data_training_result = query_training_result_experiment(supabase, experiment_choice)
 
-#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
+# Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
 data_training_result.sort(key=sort_dict_by_epoch_no)
 data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
 
@@ -84,8 +84,8 @@ plot_epochs = np.concatenate(([1],plot_epochs))
 
 # Plot the figure
 plt.figure(figsize=(10, 6)) #Size of figure
-plt.plot(epochs, mean, label='Testing accuracy variation', color='black') #Plotting mean of testing accuracy
-plt.fill_between(epochs, lower_bound, upper_bound, color='xkcd:light red', alpha=0.2, label='min-max confidence Interval') #Plotting lower and upper bound of testing accuracy
+plt.plot(epochs, mean, label='Testing accuracy variation', color='black') # Plotting mean of testing accuracy
+plt.fill_between(epochs, lower_bound, upper_bound, color='xkcd:light red', alpha=0.2, label='min-max confidence Interval') # Plotting lower and upper bound of testing accuracy
 plt.fill_between(epochs, lower_standard_deviation, upper_standard_deviation, color='xkcd:vermillion', alpha=0.2, label='standard deviation confidence Interval')
 
 plt.title('Testing accuracy at each epoch - Confidence Interval')
