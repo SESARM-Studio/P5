@@ -49,10 +49,14 @@ def plot_seed_rank_positions_across_epochs(seed_rank_positions: List[List[dict]]
   for seed in range(seeds_no):
     rank_y_values = []
     for epoch in range(epochs_no):
-      rank_y_values.append(seed_rank_positions[epoch][seed]['rank'])
-    plt.step(epoch_x_values, rank_y_values, where="mid", linewidth=2, label="seed " + str(seed_rank_positions[epoch][seed]['seed']))
+      rank_y_values.append(int(seed_rank_positions[epoch][seed]['rank']))
+    # plt.step(epoch_x_values, rank_y_values, where="mid", linewidth=2, label="seed " + str(seed_rank_positions[epoch][seed]['seed'])) # Stair graph
+    plt.plot(epoch_x_values, rank_y_values, linewidth=2, label="seed " + str(seed_rank_positions[epoch][seed]['seed'])) # Default point plot graph
 
   plt.legend()
+  plt.xlabel("Epoch")
+  plt.ylabel("Accuracy-based rank")
+  plt.yticks(list(range(1,seeds_no+1))) # y-value increments listed on y-axis
   plt.show()
 
 
@@ -145,7 +149,6 @@ def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, se
   print(seed_rank_positions)
   return seed_rank_positions
         
-
 
 def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int, p: float):
   """
@@ -250,8 +253,8 @@ def main():
   while(True):
     print("Choose an analysis")
     print("""
-        0. Rank seeds over epochs\n
-        1. Compare epochs on seed rankings\n
+        0. Rank seeds over epochs (2D step-ladder graph)\n
+        1. Compare epochs on seed rankings (3D graph)\n
       """)
     analysis_choice = int(input())
     if analysis_choice not in [0,1]:
@@ -274,7 +277,7 @@ def main():
       else:
         break
 
-  if (analysis_choice) == 0: # Rank seeds through all epochs
+  if (analysis_choice) == 0: # Rank seeds through all epochs (2D step-ladder graph)
     while(True):
       print("Choose seed range")
       print("""
@@ -311,27 +314,7 @@ def main():
     seed_rank_positions = seed_rank_positions_across_epochs(dataset_choice, ranking_approach_choice, seed_selection)
     plot_seed_rank_positions_across_epochs(seed_rank_positions, dataset_choice)
 
-  else: # Compare epochs rankings
+  else: # Compare epochs rankings (3D graph)
     print("hey")
     
 main()
-
-
-
-##### TESTING YARD ##### 
-# hip = ["1","32","2","45","8","3"]
-# hip_acc = [75, 74, 70, 68, 65, 63]
-
-# hip2 = ["1","32","2","45","8","3"]
-# hip2_acc = [75, 74, 70, 68, 65, 63]
-
-# p = 0.5
-
-# start_time = time.time()
-# print(rbo(hip, hip_acc, hip2, hip2_acc, p))
-# print("--- %s seconds ---" % (time.time() - start_time))
-
-#print(rbo_between_specific_epochs(39,59,0))
-
-#seed_rank_positions = seed_rank_positions_across_epochs(0, True, [1,7,9,13])
-#plot_seed_rank_positions_across_epochs([1],seed_rank_positions,0)
