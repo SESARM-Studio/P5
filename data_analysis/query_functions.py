@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 from supabase import create_client, Client, ClientOptions
 
-CONVERGENCE_EXPERIMENT_NR = 3
+CONVERGENCE_EXPERIMENT_NO = 3
 
 def create_supabase_connection():
     # Load environment variables from .env
@@ -17,8 +17,8 @@ def create_supabase_connection():
 
 # Query structure: Contains a list variable called "data", that is a list of dictionaries.
 # The index of the list represents the row number, the key (dictionary) is the name of the column, and the value (dictionary) is the data point of the column and row
-def query_training_result_experiment(supabase, experiment_nr):
-    if experiment_nr == CONVERGENCE_EXPERIMENT_NR:
+def query_training_result_experiment(supabase, experiment_no):
+    if experiment_no == CONVERGENCE_EXPERIMENT_NO:
         response = (
             supabase.table("training_result_convergence")
             .select("*")
@@ -29,7 +29,7 @@ def query_training_result_experiment(supabase, experiment_nr):
         response = (
             supabase.table("training_run")
             .select("training_result(*)")
-            .eq("experiment_nr", experiment_nr)
+            .eq("experiment_no", experiment_no)
             .execute()
         )
 
@@ -49,8 +49,8 @@ def query_distinct_training_epoch_no(supabase):
     )
     return response.data
 
-def query_training_epoch_accuracies_experiment(supabase, epoch, experiment_nr):
-    if experiment_nr == CONVERGENCE_EXPERIMENT_NR:
+def query_training_epoch_accuracies_experiment(supabase, epoch, experiment_no):
+    if experiment_no == CONVERGENCE_EXPERIMENT_NO:
         response = (
             supabase.table("training_result_convergence")
             .select("accuracy")
@@ -62,7 +62,7 @@ def query_training_epoch_accuracies_experiment(supabase, epoch, experiment_nr):
         response = (
             supabase.table("training_run")
             .select("training_result(accuracy)")
-            .eq("experiment_nr", experiment_nr)
+            .eq("experiment_no", experiment_no)
             .eq("training_result.epoch_no", epoch)
             .execute()
         )
