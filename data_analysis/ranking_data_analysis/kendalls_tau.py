@@ -1,6 +1,6 @@
 from math import sqrt
 
-from query_functions import *
+from data_analysis.query_functions import *
 
 EQUAL = 0
 LESS_THAN = -1

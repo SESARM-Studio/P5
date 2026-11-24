@@ -1,6 +1,10 @@
+from typing import Callable
+
 import matplotlib.pyplot as plt
+
 from kendalls_tau import *
 from rbo import *
+
 
 
 EPOCHS_NO_STNDRD = 60

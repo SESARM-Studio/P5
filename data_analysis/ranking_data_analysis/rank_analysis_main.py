@@ -1,5 +1,5 @@
-from data_analysis.ranking_data_analysis.rbo import *
-from data_analysis.ranking_data_analysis.kendalls_tau import *
+from rbo import *
+from kendalls_tau import *
 from plots import *
 
 def main():
@@ -64,13 +64,11 @@ def main():
           0. Rank compared to all seeds in dataset\n
           1. Rank relative to selected seeds\n
         """)
-      ranking_approach_choice_input = int(input())
-      if ranking_approach_choice_input not in [0,1]:
+      ranking_approach_choice = bool(int(input()))
+      if ranking_approach_choice not in [True, False]:
         continue
       else:
         break
-
-    ranking_approach_choice = True if ranking_approach_choice_input == 1 else False
 
     seed_rank_positions = seed_rank_positions_across_epochs(dataset_choice, ranking_approach_choice, seed_selection)
     plot_seed_rank_positions_across_epochs(seed_rank_positions, dataset_choice)
@@ -128,6 +126,7 @@ def main():
         print(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter))
       else:
         print(kendalls_tau_b_between_specific_epochs(epoch_selection[0], epoch_selection_input[1], dataset_choice))
+
     elif epoch_comparison_approach == 1:
       while (True):
         print("Choose a ranked list comparison method")

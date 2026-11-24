@@ -1,10 +1,9 @@
-from typing import Callable, List # For declaring list types 
+from typing import List # For declaring list types 
 
 import pandas as pd # Creation of DataFrame objects for RBO.
 import pyterrier_alpha as pta # Rank-Biased Overlap (RBO) implementation
 
-from data_analysis.ranking_data_analysis.kendalls_tau import *
-from query_functions import *
+from data_analysis.query_functions import *
 
 supabase = create_supabase_connection()
 
