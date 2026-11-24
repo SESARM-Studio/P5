@@ -1,9 +1,11 @@
+from typing import Callable, List # For declaring list types 
+import time # Remove this when done (used only in testing)
+
+import matplotlib.pyplot as plt
 import pandas as pd # Creation of DataFrame objects for RBO.
 import pyterrier_alpha as pta # Rank-Biased Overlap (RBO) implementation
-from typing import List # For declaring list types 
+
 from query_functions import *
-import time # Remove this when done (used only in testing)
-import matplotlib.pyplot as plt
 
 supabase = create_supabase_connection()
 
@@ -241,6 +243,34 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   return pta.rbo(df_a, df_b, p)
 
 
+
+def threedee_plot(rank_function: Callable, epochs: int, data_flag: int) -> None:
+  fig = plt.figure()
+  ax = fig.add_subplot(projection='3d')
+
+  x, y, z = [], [], []
+  for i in range(epochs):
+    for j in range(i + 1, epochs):
+      _, rbo = next(iter(rank_function(i, j, data_flag, 0.9)))
+
+      # Avoid querying twice and instead mirror output
+      x.extend([i, j])
+      y.extend([j, i])
+      z.extend([rbo, rbo])
+
+  ax.scatter(x,y,z)
+
+  # Set visual symmetry for x and y axis
+  ax.set_xlim(0, epochs - 1)
+  ax.set_ylim(epochs - 1, 0)
+
+  ax.set_xlabel("Epoch list 1")
+  ax.set_ylabel("Epoch list 2")
+  ax.set_zlabel("RBO")
+
+  plt.show()
+
+
 def main():
 
   analysis_choice: int
@@ -248,6 +278,11 @@ def main():
   seed_range_choice: int
   seed_selection = List[int]
   ranking_approach_choice: bool
+
+
+##### TESTING YARD #####
+# hip = ["1","32","2","45","8","3"]
+# hip_acc = [75, 74, 70, 68, 65, 63]
 
   # Choose analysis
   while(True):
@@ -316,5 +351,9 @@ def main():
 
   else: # Compare epochs rankings (3D graph)
     print("hey")
-    
-main()
+
+if __name__ == "__main__":
+  main()
+  #seed_rank_positions_across_epochs(0)
+  #plot_seed_rank_positions_across_epochs(0)
+  # threedee_plot(rbo_between_specific_epochs, epochs=60, data_flag=2)
