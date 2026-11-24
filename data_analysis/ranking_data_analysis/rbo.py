@@ -191,5 +191,5 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   df_a["score"] = list_a_accuracies
   df_b["score"] = list_b_accuracies
 
-  return dict(pta.rbo(df_a, df_b, p))
+  return pta.rbo(df_a, df_b, p)
 

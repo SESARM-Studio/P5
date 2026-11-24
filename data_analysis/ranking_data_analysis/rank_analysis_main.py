@@ -119,11 +119,9 @@ def main():
           else:
             break
 
-        rbo_score = rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter)['rbo_score']
+        _, rbo_score = next(iter(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter)))
         print(f"Rank-Biased Overlap score: {rbo_score}")
       
-
-        print(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter))
       else:
         print(kendalls_tau_b_between_specific_epochs(epoch_selection[0], epoch_selection_input[1], dataset_choice))
 
