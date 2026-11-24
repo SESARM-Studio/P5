@@ -66,7 +66,8 @@ training_data = datasets.CIFAR10(
     train=True,
     download=False,
     transform=v2.Compose(
-        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True), v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
+        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
+         v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
 )
 
 test_data = datasets.CIFAR10(
@@ -74,7 +75,8 @@ test_data = datasets.CIFAR10(
     train=False,
     download=False,
     transform=v2.Compose(
-        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True), v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
+        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
+         v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
 )
 
 seed = torch.Generator().manual_seed(args.seed)
@@ -203,11 +205,23 @@ for epoch in range(args.epochs):
 
     print(f"Time: {time.time() - epoch_time}")
 
+    # Prepare for DB
     if args.csv_output is None:
-        list_of_epochs_accuracy.append([epoch, train_avg_acc])
+        if 2 >= args.exp >=1:
+            list_of_epochs_accuracy.append([epoch, train_avg_acc])
+        elif args.exp == 3:
+            list_of_epochs_accuracy.append([epoch, test_avg_acc, val_avg_acc, train_avg_acc,
+                                            val_avg_loss, train_avg_loss, test_avg_loss])
+
+    ## Append to CSV
     else:
         with open(f"{args.csv_output}", "a", newline='') as f:
-            csv.writer(f).writerow([args.seed, epoch, train_avg_acc, train_avg_loss, val_avg_acc, val_avg_loss, test_avg_acc, test_avg_loss, time.time() - epoch_time])
+            if 2 >= args.exp >= 1:
+                csv.writer(f).writerow([args.seed, epoch, train_avg_acc, train_avg_loss,
+                                        test_avg_acc, test_avg_loss, time.time() - epoch_time])
+            elif args.exp == 3:
+                csv.writer(f).writerow([args.seed, epoch, train_avg_acc, train_avg_loss, val_avg_acc,
+                                        val_avg_loss, test_avg_acc, test_avg_loss, time.time() - epoch_time])
 
 end_time = datetime.now().isoformat()
 

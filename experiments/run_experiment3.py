@@ -11,6 +11,8 @@ import sys
 MAX_JOBS = 8
 SECONDS_BEFORE_RETRY = 30
 
+EXP_NO = 3
+
 # User id is a required argument. The UID corresponds to the run_by column in the training_run table
 parser = argparse.ArgumentParser()
 parser.add_argument("--uid", required=True)
@@ -71,7 +73,7 @@ def main():
         else:
             training_id = initialize_training(client, seed, temp_config_id, args.uid)
 
-        subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiments' / 'job.sh'), str(seed), str(training_id), args.csv_output or "", args.dist_output or ""],
+        subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiments' / 'job.sh'), str(seed), str(training_id), EXP_NO, args.csv_output or "", args.dist_output or ""],
             cwd=PROJECT_ROOT,
             check=True,
         )

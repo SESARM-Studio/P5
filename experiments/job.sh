@@ -19,8 +19,12 @@ CONTAINER="/ceph/project/p5_intelligent_seeds/project_container.sif"
 
 SEED="$1"
 TRAINING_ID="$2"
+EXP_NO="$3"
 
-echo "seed=$1"
+echo "seed: $SEED"
+echo "node: $(hostname)"
+echo "gpu_index: $SLURM_JOB_GPUS"
+echo "container: $CONTAINER"
 
 cd "$PROJECT_ROOT"
 PYTHON="$PROJECT_ROOT/.venv/bin/python"
@@ -44,5 +48,6 @@ singularity exec --nv --bind "$PROJECT_ROOT" --bind "$DATA_PATH:/data" "$CONTAIN
 	--seed "$SEED" \
 	--epochs 60 \
 	--training-id "$TRAINING_ID" \
-  ${3:+--csv-output "$3"} \
-  ${4:+--dist-output "$4"}
+	--exp "$EXP_NO" \
+  ${3:+--csv-output "$4"} \
+  ${4:+--dist-output "$5"}
