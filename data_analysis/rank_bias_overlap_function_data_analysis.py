@@ -307,7 +307,7 @@ def kendalls_tau_b_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, dat
     return kendalls_tau_b(list_a_accuracies, list_b_accuracies)
 
 
-def threedee_plot(rank_function: Callable, epochs: int, data_flag: int) -> None:
+def threedee_plot(rank_function: Callable, epochs: int, data_flag: int, persistance_parameter: float = 0.9) -> None:
   fig = plt.figure()
   ax = fig.add_subplot(projection='3d')
 
@@ -317,7 +317,7 @@ def threedee_plot(rank_function: Callable, epochs: int, data_flag: int) -> None:
       if rank_function == kendalls_tau_b_between_specific_epochs:
         ranking_value = rank_function(i, j, data_flag)
       else:
-        _, ranking_value = next(iter(rank_function(i, j, data_flag, 0.9)))
+        _, ranking_value = next(iter(rank_function(i, j, data_flag, persistance_parameter)))
 
       # Avoid querying twice and instead mirror output
       x.extend([i, j])
@@ -465,10 +465,49 @@ def main():
             break
 
         print(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter))
+      else:
+        print(kendalls_tau_b_between_specific_epochs(epoch_selection[0], epoch_selection_input[1], dataset_choice))
+    elif epoch_comparison_approach == 1:
+      while (True):
+        print("Choose a ranked list comparison method")
+        print("""
+            0. Rank-Biased Overlap\n
+            1. Kendall-Tau\n
+          """)
+        comparison_method_choice = int(input())
+        if comparison_method_choice not in [0,1]:
+          continue
+        else:
+          break
+
+      if comparison_method_choice == 0:
+        while (True):
+          print("Choose a persistance parameter [0,1]:\n")
+          persistance_parameter = float(input())
+
+          if not (persistance_parameter >= 0 and persistance_parameter <=1):
+            continue
+          else:
+            break
+
+        print("Making 3D plot...")
+        threedee_plot(
+          rbo_between_specific_epochs,
+          epochs=60,
+          data_flag=dataset_choice,
+          persistance_parameter=persistance_parameter
+        )
+      else:
+        print("Making 3D plot...")
+        threedee_plot(
+          kendalls_tau_b_between_specific_epochs,
+          epochs=60,
+          data_flag=dataset_choice
+        )
+
+
 
 if __name__ == "__main__":
   main()
   #seed_rank_positions_across_epochs(0)
   #plot_seed_rank_positions_across_epochs(0)
-  # threedee_plot(rbo_between_specific_epochs, epochs=10, data_flag=2)
-  # threedee_plot(kendalls_tau_b_between_specific_epochs, epochs=10, data_flag=2)
