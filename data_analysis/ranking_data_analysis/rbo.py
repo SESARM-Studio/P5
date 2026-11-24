@@ -155,7 +155,7 @@ def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int
 
   for entry in result_epoch_data_a.data:
     # What an entry looks like
-    # {'training_id': '941beba0-0036-4660-8b75-6c49f4b94936', 'seed': 200, 'training_result_table_name': [{'accuracy_column_name': 0.3811, 'epoch_no': 2, 'training_id': '941beba0-0036-4660-8b75-6c49f4b94936'}]}
+    # {'seed': 200, 'training_result_table_name': [{'accuracy_column_name': 0.3811, 'epoch_no': 2}]}
 
     # Adding the seeds that are considered for ranking
     list_a.append(entry[SEED_COLUMN_NAME])
@@ -167,7 +167,7 @@ def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int
     # Adding the seeds that are considered for ranking
     list_b.append(entry[SEED_COLUMN_NAME])
 
-    # Adding accuracies for epoch a
+    # Adding accuracies for epoch b
     list_b_accuracies.append(entry[training_result_table_name][0][accuracy_column_name])
 
   return rbo(list_a, list_a_accuracies, list_b, list_b_accuracies, p)
@@ -187,9 +187,8 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   df_a["qid"] = "rbo_score"
   df_b["qid"] = "rbo_score"
 
-  # score is used in order for PyTerrier to know what where each item ranks.  
+  # score is provided as the metric PyTerrier will use to rank each item.  
   df_a["score"] = list_a_accuracies
   df_b["score"] = list_b_accuracies
 
   return pta.rbo(df_a, df_b, p)
-
