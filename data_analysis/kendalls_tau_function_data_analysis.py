@@ -1,5 +1,7 @@
 from math import sqrt
 
+from query_functions import *
+
 EQUAL = 0
 LESS_THAN = -1
 LARGER_THAN = 1

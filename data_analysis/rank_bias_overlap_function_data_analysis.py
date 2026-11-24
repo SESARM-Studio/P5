@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd # Creation of DataFrame objects for RBO.
 import pyterrier_alpha as pta # Rank-Biased Overlap (RBO) implementation
 
+from kendalls_tau_function_data_analysis import kendalls_tau_b
 from query_functions import *
 
 supabase = create_supabase_connection()
@@ -246,6 +247,65 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   return pta.rbo(df_a, df_b, p)
 
 
+def kendalls_tau_b_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int):
+    """
+    Returns the rank-biased overlap for all seeds between two specified epochs, epoch_no_a and epoch_no_a.\n
+    p is the persistance parameter used for Rank-Biased Overlap.\n
+    --------------
+    data_flag = 0 // experiment 1 data\n
+    data_flag = 1 // experiment 2 (300 new seeds) data\n
+    data_flag = 2 // experiment 2 (all 500 seeds) data\n
+    data_flag = 3 // experiment 3 data\n
+        """
+    training_result_table_name: str
+    accuracy_column_name: str
+
+    list_a_accuracies = []
+    list_b_accuracies = []
+    result_epoch_data_a: any
+    result_epoch_data_b: any
+
+    match data_flag:
+        case 0:
+            training_result_table_name = "training_result"
+            accuracy_column_name = "accuracy"
+            result_epoch_data_a = query_epoch_accuracies_experiment_1(supabase, epoch_no_a)
+            result_epoch_data_b = query_epoch_accuracies_experiment_1(supabase, epoch_no_b)
+
+        case 1:
+            training_result_table_name = "training_result"
+            accuracy_column_name = "accuracy"
+            result_epoch_data_a = query_epoch_accuracies_experiment_2_300_seeds(supabase, epoch_no_a)
+            result_epoch_data_b = query_epoch_accuracies_experiment_2_300_seeds(supabase, epoch_no_b)
+
+        case 2:
+            training_result_table_name = "training_result"
+            accuracy_column_name = "accuracy"
+            result_epoch_data_a = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_a)
+            result_epoch_data_b = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_b)
+
+        case 3:
+            training_result_table_name = "training_result_convergence"
+            accuracy_column_name = "validation_accuracy"
+            result_epoch_data_a = query_epoch_accuracies_experiment_3(supabase, epoch_no_a)
+            result_epoch_data_b = query_epoch_accuracies_experiment_3(supabase, epoch_no_b)
+
+
+
+
+    for entry in result_epoch_data_a.data:
+        # What an entry looks like
+        # {'training_id': '941beba0-0036-4660-8b75-6c49f4b94936', 'seed': 200, 'training_result_table_name': [{'accuracy_column_name': 0.3811, 'epoch_no': 2, 'training_id': '941beba0-0036-4660-8b75-6c49f4b94936'}]}
+
+        # Adding accuracies for epoch a
+        list_a_accuracies.append(entry[training_result_table_name][0][accuracy_column_name])
+
+    for entry in result_epoch_data_b.data:
+        # Adding accuracies for epoch a
+        list_b_accuracies.append(entry[training_result_table_name][0][accuracy_column_name])
+
+    return kendalls_tau_b(list_a_accuracies, list_b_accuracies)
+
 
 def threedee_plot(rank_function: Callable, epochs: int, data_flag: int) -> None:
   fig = plt.figure()
@@ -254,12 +314,15 @@ def threedee_plot(rank_function: Callable, epochs: int, data_flag: int) -> None:
   x, y, z = [], [], []
   for i in range(epochs):
     for j in range(i + 1, epochs):
-      _, rbo = next(iter(rank_function(i, j, data_flag, 0.9)))
+      if rank_function == kendalls_tau_b_between_specific_epochs:
+        ranking_value = rank_function(i, j, data_flag)
+      else:
+        _, ranking_value = next(iter(rank_function(i, j, data_flag, 0.9)))
 
       # Avoid querying twice and instead mirror output
       x.extend([i, j])
       y.extend([j, i])
-      z.extend([rbo, rbo])
+      z.extend([ranking_value, ranking_value])
 
   ax.scatter(x,y,z)
 
@@ -269,7 +332,10 @@ def threedee_plot(rank_function: Callable, epochs: int, data_flag: int) -> None:
 
   ax.set_xlabel("Epoch list 1")
   ax.set_ylabel("Epoch list 2")
-  ax.set_zlabel("RBO")
+  if rank_function == kendalls_tau_b_between_specific_epochs:
+    ax.set_zlabel("Kendalls tau-b")
+  else:
+    ax.set_zlabel("RBO")
 
   plt.show()
 
@@ -399,6 +465,10 @@ def main():
             break
 
         print(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter))
-      
-    
-main()
+
+if __name__ == "__main__":
+  main()
+  #seed_rank_positions_across_epochs(0)
+  #plot_seed_rank_positions_across_epochs(0)
+  # threedee_plot(rbo_between_specific_epochs, epochs=10, data_flag=2)
+  # threedee_plot(kendalls_tau_b_between_specific_epochs, epochs=10, data_flag=2)
