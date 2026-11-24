@@ -47,9 +47,15 @@ def plot_seed_rank_positions_across_epochs(seed_rank_positions: List[List[dict]]
   # Generate plots for each seed rank across epochs
   epoch_x_values = list(range(epochs_no))
   for seed in range(seeds_no):
+
     rank_y_values = []
     for epoch in range(epochs_no):
       rank_y_values.append(int(seed_rank_positions[epoch][seed]['rank']))
+    
+    # Print average rank for this seed
+    print(f"Avg. rank for seed {str(seed_rank_positions[epoch][seed]['seed'])}: " + str(sum(rank_y_values) / len(rank_y_values)))
+    
+
     # plt.step(epoch_x_values, rank_y_values, where="mid", linewidth=2, label="seed " + str(seed_rank_positions[epoch][seed]['seed'])) # Stair graph
     plt.plot(epoch_x_values, rank_y_values, linewidth=2, label="seed " + str(seed_rank_positions[epoch][seed]['seed'])) # Default point plot graph
 
@@ -146,7 +152,6 @@ def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, se
     if len(seed_selection) > 0: epoch_ranking = [row for row in epoch_ranking if row['seed'] in seed_selection] # Redundant if relative_ranking is True in check further above.
     seed_rank_positions.append(epoch_ranking)
 
-  print(seed_rank_positions)
   return seed_rank_positions
         
 
@@ -196,8 +201,6 @@ def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int
       accuracy_column_name = "validation_accuracy"
       result_epoch_data_a = query_epoch_accuracies_experiment_3(supabase, epoch_no_a)
       result_epoch_data_b = query_epoch_accuracies_experiment_3(supabase, epoch_no_b)
-
-
 
 
   for entry in result_epoch_data_a.data:
@@ -254,7 +257,7 @@ def main():
     print("Choose an analysis")
     print("""
         0. Rank seeds over epochs (2D step-ladder graph)\n
-        1. Compare epochs on seed rankings (3D graph)\n
+        1. Compare epochs on seed rankings (3D graph or specific epoch rank comparison)\n
       """)
     analysis_choice = int(input())
     if analysis_choice not in [0,1]:
@@ -298,7 +301,7 @@ def main():
       seed_selection = []
 
     while(True):
-      print("Choose ranking approach")
+      print("Choose an approach")
       print("""
           0. Rank compared to all seeds in dataset\n
           1. Rank relative to selected seeds\n
@@ -315,6 +318,52 @@ def main():
     plot_seed_rank_positions_across_epochs(seed_rank_positions, dataset_choice)
 
   else: # Compare epochs rankings (3D graph)
-    print("hey")
+    while(True):
+      print("Choose an approach")
+      print("""
+          0. Choose two specific epochs to compare on seed rankings\n
+          1. Visualise all epoch-to-epoch rank comparisons in 3D\n
+        """)
+      epoch_comparison_approach = int(input())
+      if epoch_comparison_approach not in [0,1]:
+        continue
+      else:
+        break
+
+    if (epoch_comparison_approach == 0):
+      while (True):
+        print("Specify two epochs in this format: 2,30")
+        epoch_selection_input = str(input())
+        epoch_selection = [int(epoch) for epoch in epoch_selection_input.split(',')]
+
+        if (len(epoch_selection) != 2):
+          continue
+        else:
+          break
+
+      while (True):
+        print("Choose a ranked list comparison method")
+        print("""
+            0. Rank-Biased Overlap\n
+            1. Kendall-Tau\n
+          """)
+        comparison_method_choice = int(input())
+        if comparison_method_choice not in [0,1]:
+          continue
+        else:
+          break
+
+      if (comparison_method_choice == 0):
+        while (True):
+          print("Choose a persistance parameter [0,1]:\n")
+          persistance_parameter = float(input())
+
+          if not (persistance_parameter >= 0 and persistance_parameter <=1):
+            continue
+          else:
+            break
+
+        print(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter))
+      
     
 main()
