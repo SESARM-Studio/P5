@@ -2,33 +2,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
 from scipy.stats import skewnorm
+from prompt_functions import prompt_user
 
 PDF_STEPSIZE = 0.05 # The stepsize for the np.arange x-values for the pdf.
 HISTOGRAM_BINS = 20
+FIRST_EXPERIMENT_NO = 1
+LAST_EXPERIMENT_NO = 3
 
 supabase = create_supabase_connection()
 
 # Query the database to get a list of dictionaries with epochs number
 result_epochs_no_query = query_distinct_training_epoch_no(supabase)
-list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query.data if "epoch_no" in row]
+list_epochs_no = [row["epoch_no"] for row in result_epochs_no_query if "epoch_no" in row]
 last_epoch = max(list_epochs_no)
 
 # Prompt user for input
-experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3)"))
+experiment_choice = prompt_user(FIRST_EXPERIMENT_NO, LAST_EXPERIMENT_NO)
 
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
-match experiment_choice:
-    case 1:
-        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_1(supabase, last_epoch)
-    case 2:
-        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_2(supabase, last_epoch)
-    case 3:
-        result_last_epoch_accuracies = query_last_training_epoch_accuracies_experiment_3(supabase, last_epoch)
-    case _:
-        raise Exception("You have selected an invalid input")
+result_last_epoch_accuracies = query_training_epoch_accuracies_experiment(supabase, last_epoch, experiment_choice)
 
-# result_last_epoch_accuracies.data contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
-list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies.data if "accuracy" in row])
+# result_last_epoch_accuracies contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
+list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies if "accuracy" in row])
 list_accuracy_data *= 100 # Multiply decimal values to become percentage values
 
 min_accuracy = min(list_accuracy_data)
@@ -47,14 +42,14 @@ shape, loc, scale = skewnorm.fit(list_accuracy_data)
 graph_ypdf = skewnorm.pdf(graph_xpdf, shape, loc, scale)
 fig, ax = plt.subplots()
 
-#Plot the histogram
+# Plot the histogram
 histogram_style = {"facecolor": "lightblue", "edgecolor": "white", "linewidth": 1 }
 ax.hist(list_accuracy_data, bins=HISTOGRAM_BINS, density=True, **histogram_style)
 
-#Plot the probability distribution function
+# Plot the probability distribution function
 ax.plot(graph_xpdf, graph_ypdf)
 
-#Plot every data accuracy at the bottom of the graph as vertical lines
+# Plot every data accuracy at the bottom of the graph as vertical lines
 plot_style = {"color": "darkblue", "marker": "|", "markersize": 20}
 y_zeroes = 0*list_accuracy_data
 ax.plot(list_accuracy_data, y_zeroes, **plot_style)

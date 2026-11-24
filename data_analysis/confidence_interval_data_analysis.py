@@ -1,42 +1,38 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
+from prompt_functions import prompt_user
 
 FIRST_ROW = 0
+FIRST_EXPERIMENT_NO = 1
+LAST_EXPERIMENT_NO = 3
 
 def sort_dict_by_epoch_no(arg):
     return arg['epoch_no']
 
-#Establish supabase connection using our connection function from query_functions.py
+# Establish supabase connection using our connection function from query_functions.py
 supabase = create_supabase_connection()
 
 # Prompt user for input
-experiment_choice = int(input("From which experiment do you wish to retrieve data from: EX1 (1) - EX2 (2) - EX3 (3)"))
+experiment_choice = prompt_user(FIRST_EXPERIMENT_NO, LAST_EXPERIMENT_NO)
 
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
-match experiment_choice:
-    case 1:
-        data_training_result = query_training_result_experiment_1(supabase)
-    case 2:
-        data_training_result = query_training_result_experiment_2(supabase)
-    case 3:
-        data_training_result = query_training_result_experiment_3(supabase)
-    case _:
-        raise Exception("You have selected an invalid input")
-#Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
-data_training_result.data.sort(key=sort_dict_by_epoch_no)
+data_training_result = query_training_result_experiment(supabase, experiment_choice)
+
+# Sort the data from the query, so that all accuracies from epoch '1' is first and then '2' and so on
+data_training_result.sort(key=sort_dict_by_epoch_no)
 data_distinct_training_epoch_no = query_distinct_training_epoch_no(supabase)
 
 # Create a list of all columns (keys), so one can access the values of the dictionaries
 column_list = []
-for column_name in data_training_result.data[FIRST_ROW]:
+for column_name in data_training_result[FIRST_ROW]:
     column_list.append(column_name)
 
 # Setup epoch datapoints for plotting:
 # We append each number from the query of distinct epoch numbers (DB-column: epoch_no)
 # We sort them and use min/max for epoch start and end
 epochs = []
-for row in data_distinct_training_epoch_no.data:
+for row in data_distinct_training_epoch_no:
     epoch = row.get(column_list[1])
     epochs.append(epoch)
 epochs.sort()
@@ -47,7 +43,7 @@ epoch_end = max(epochs)
 # We take all the accuracies from the query, and store them in a numpy list
 # This enables the np.split function that takes arg1: a list and arg2: a number, and splits the list into a number of parts based on the number given 
 all_accuracies = []
-for dictionary in data_training_result.data:
+for dictionary in data_training_result:
     all_accuracies.append(dictionary.get("accuracy"))
 all_accuracies = np.array(all_accuracies)
 all_accuracies *= 100 # Multiply decimal values to become percentage values
@@ -83,8 +79,8 @@ plot_epochs = np.concatenate(([1],plot_epochs))
 
 # Plot the figure
 plt.figure(figsize=(10, 6)) #Size of figure
-plt.plot(epochs, mean, label='Testing accuracy variation', color='black') #Plotting mean of testing accuracy
-plt.fill_between(epochs, lower_bound, upper_bound, color='xkcd:light red', alpha=0.2, label='min-max confidence Interval') #Plotting lower and upper bound of testing accuracy
+plt.plot(epochs, mean, label='Testing accuracy variation', color='black') # Plotting mean of testing accuracy
+plt.fill_between(epochs, lower_bound, upper_bound, color='xkcd:light red', alpha=0.2, label='min-max confidence Interval') # Plotting lower and upper bound of testing accuracy
 plt.fill_between(epochs, lower_standard_deviation, upper_standard_deviation, color='xkcd:vermillion', alpha=0.2, label='standard deviation confidence Interval')
 
 plt.title('Testing accuracy at each epoch - Confidence Interval')
