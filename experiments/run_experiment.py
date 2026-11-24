@@ -11,18 +11,19 @@ import sys
 MAX_JOBS = 8
 SECONDS_BEFORE_RETRY = 30
 
+
 # User id is a required argument. The UID corresponds to the run_by column in the training_run table
 parser = argparse.ArgumentParser()
 parser.add_argument("--uid", required=True)
+parser.add_argument("--exp-no", required=True)
 parser.add_argument("--csv-output")
 parser.add_argument("--dist-output")
 parser.add_argument("--seed-file", default="seeds.txt")
 args = parser.parse_args()
 
 # Determines the root dir as the parrents parrent directory of the file,
-# because of the structure: root/experiment0/run_experiment0.py
+# because of the structure: root/experiments/run_experiment.py
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-
 
 
 # Setup for local run (without DB)
@@ -60,18 +61,19 @@ def main():
 
     # Starts the maximum amount of jobs at a time, until all seeds are used from the DB.
     # Uses subprocess to run the batch script job.sh with relevant arguemnts.
-    print(f"{running_jobs} running jobs. Starting {loop_range}")
+    print(f"{running_jobs} running jobs. Starting up to {loop_range}")
     for _ in range(loop_range):
         seed = new_seed()
         if seed is None:
+            print("No more available seeds")
             exit(0)
 
         if args.csv_output:
             training_id = "local_csv"
         else:
-            training_id = initialize_training(client, seed, temp_config_id, args.uid)
+            training_id = initialize_training(client, seed, temp_config_id, args.uid, str(args.exp_no))
 
-        subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiment0' / 'job.sh'), str(seed), str(training_id), args.csv_output or "", args.dist_output or ""],
+        subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiments' / 'job.sh'), str(seed), str(training_id), str(args.exp_no), args.csv_output or "", args.dist_output or ""],
             cwd=PROJECT_ROOT,
             check=True,
         )

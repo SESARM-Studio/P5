@@ -22,11 +22,11 @@ def database_login(user):
 
 
 # Insert a training run with related configuration details and produce a warning if the seed is already used with that configuration
-def initialize_training (client, seed, config_id, user_name):
+def initialize_training (client, seed, config_id, user_name, experiment_no):
     validate_client(client)
 
     # Check that parameters are ready to be inserted into the database
-    validate_integer(seed)
+    validate_integer(seed, "seed")
     validate_string(config_id, "config_id", allow_space_in_string=False)
     validate_string(user_name, "user_name",allow_space_in_string=True)
 
@@ -34,8 +34,9 @@ def initialize_training (client, seed, config_id, user_name):
     try:
         response = (
             client.table("training_run")
-            .insert({"config_id": config_id, "run_by": user_name, "seed": seed, "start_time": datetime.now().isoformat()})
-            .select("training_id")
+            .insert({"config_id": config_id, "run_by": user_name, "seed": seed,
+                     "start_time": datetime.now().isoformat(), "experiment_no": experiment_no})
+            .select("*")
             .execute()
         )
 
@@ -93,14 +94,12 @@ def finalize_training (client, training_id, results, end_time, experiment_no):
 
         if len(response_update.data) == 1: # Supabase returns the affected rows in the .data part as a list of dictionaries
             update_result = response_update.data[0] # Supabase always returns the affected rows as list of dictionaries even if there is only 1 row.
-            if  update_result["training_id"] == training_id and update_result["end_time"] == end_time.replace(tzinfo=timezone.utc):
+            if  update_result["training_id"] == training_id:
                 success_update = True
             else:
-                print("The training ID and/or the end time does not match the row that got changed in the database")
+                print("The training ID does not match the row that got changed in the database")
                 print(f"Training ID from training: {training_id}")
                 print(f"Training ID from database: {update_result['training_id']}")
-                print(f"End time from training: {end_time.replace(tzinfo=timezone.utc)}")
-                print(f"End time from database: {update_result['end_time']}")
                 success_update = False
         else:
             print(f"{len(response_update.data)} rows got updated when only 1 should")

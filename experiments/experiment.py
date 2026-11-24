@@ -8,13 +8,10 @@ from db_scripts.database_login import *
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import datasets
 from torchvision.transforms import v2
 from torchvision.models import efficientnet_v2_s
-from torch.utils.data import Dataset
-
-
 
 """
 Main structure is inspired by PyTorch docs:
@@ -37,6 +34,7 @@ class IndexedDataset(Dataset):
         return x, y, img_id
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--exp", required=True, type=int)
 parser.add_argument("--training-id", required=True)
 parser.add_argument("-s", "--seed", type=int, required=True)
 parser.add_argument("-e", "--epochs", type=int, required=True)
@@ -53,17 +51,21 @@ np.random.seed(args.seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 torch.use_deterministic_algorithms(True)
+generator = torch.Generator().manual_seed(args.seed)
 
 
 TENSOR_MEAN_CHANNELS = (0.5, 0.5, 0.5)
 TENSOR_STD_CHANNELS = (0.5, 0.5, 0.5)
+BATCH_SIZE = 64
+NUM_WORKERS = 8
 
 training_data = datasets.CIFAR10(
     root="/data",
     train=True,
     download=False,
     transform=v2.Compose(
-        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True), v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
+        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
+         v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
 )
 
 test_data = datasets.CIFAR10(
@@ -71,15 +73,38 @@ test_data = datasets.CIFAR10(
     train=False,
     download=False,
     transform=v2.Compose(
-        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True), v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
+        [v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
+         v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
 )
 
-BATCH_SIZE = 64
-NUM_WORKERS = 8
-train_dataloader = DataLoader(IndexedDataset(training_data), batch_size=BATCH_SIZE,
+if args.exp == 3:
+    print("Experiment: ", args.exp)
+
+    training_set_size = 0.8
+    validation_set_size = 0.2
+    train_set, validation_set = random_split(IndexedDataset(training_data),
+                                             [training_set_size, validation_set_size], generator=generator)
+elif args.exp in [1,2]:
+    print("Experiment: ", args.exp)
+    train_set = IndexedDataset(training_data)
+    validation_set = None
+
+else:
+    exit(f"Experiment {args.exp} is not defined")
+
+train_dataloader = DataLoader(train_set, batch_size=BATCH_SIZE,
                               shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+
+
 test_dataloader = DataLoader(IndexedDataset(test_data), batch_size=BATCH_SIZE,
                              shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+
+# Shuffling is for preventing overfitting, and does not affect validation loss, so it's set to false for time saving
+# As backpropagation, which takes a lot of memory, is not used for validation, we can double the batch size
+# Source: https://docs.pytorch.org/tutorials/beginner/nn_tutorial.html#add-validation
+validation_dataloader = DataLoader(validation_set, batch_size=BATCH_SIZE*2,
+                               shuffle=False, num_workers=NUM_WORKERS, pin_memory=True) \
+    if validation_set is not None else None
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using {device} device")
@@ -102,7 +127,10 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
 def train(dataloader, model, loss_fn, optimizer):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
     model.train()
+    test_loss, correct = 0, 0
     for X, labels_in_batch, _ in dataloader:
         X, labels_in_batch = X.to(device), labels_in_batch.to(device)
 
@@ -114,6 +142,30 @@ def train(dataloader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
+
+        # Save correct and loss for avg accuracy and loss
+        test_loss += loss_fn(pred, labels_in_batch).item()
+        correct += (pred.argmax(1) == labels_in_batch).type(torch.float).sum().item()
+
+    avg_loss = test_loss / num_batches
+    accuracy = correct / size
+    return accuracy, avg_loss
+
+def validate(dataloader, model, loss_fn):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    model.eval()
+    test_loss, correct = 0, 0
+    with torch.no_grad():
+        for X, labels_in_batch, image_ids_in_batch in dataloader:
+            X, labels_in_batch = X.to(device), labels_in_batch.to(device)
+            pred = model(X)
+            test_loss += loss_fn(pred, labels_in_batch).item()
+            correct += (pred.argmax(1) == labels_in_batch).type(torch.float).sum().item()
+
+    avg_loss = test_loss / num_batches
+    accuracy = correct / size
+    return accuracy, avg_loss
 
 def test(dataloader, model, loss_fn, args, epoch):
     size = len(dataloader.dataset)
@@ -139,29 +191,45 @@ def test(dataloader, model, loss_fn, args, epoch):
     accuracy = correct / size
     return accuracy, avg_loss
 
-
 epoch_start = time.time();
 list_of_epochs_accuracy = []
 for epoch in range(args.epochs):
     epoch_time = time.time()
     print(f"\nEpoch {epoch}\n-------------------------------")
-    train(train_dataloader, model, loss_fn, optimizer)
-    epoch_acc, epoch_loss = test(test_dataloader, model, loss_fn, args, epoch)
+    train_avg_acc, train_avg_loss = train(train_dataloader, model, loss_fn, optimizer)
+    print(f"Training accuracy: {train_avg_acc}, Train avg loss: {train_avg_loss}")
+    if validation_set is not None:
+        val_avg_acc, val_avg_loss = validate(validation_dataloader, model, loss_fn)
+        print(f"Validation accuracy: {val_avg_acc}, Validation avg loss: {val_avg_loss}")
+    test_avg_acc, test_avg_loss = test(test_dataloader, model, loss_fn, args, epoch)
+    print(f"Testing accuracy: {test_avg_acc}, Testing Avg loss: {test_avg_loss}")
 
-    print(f"Accuracy: {epoch_acc}, Avg loss: {epoch_loss}")
+
     print(f"Time: {time.time() - epoch_time}")
 
+    # Prepare for DB
     if args.csv_output is None:
-        list_of_epochs_accuracy.append([epoch, epoch_acc])
+        if 2 >= args.exp >=1:
+            list_of_epochs_accuracy.append([epoch, train_avg_acc])
+        elif args.exp == 3:
+            list_of_epochs_accuracy.append([epoch, test_avg_acc, val_avg_acc, train_avg_acc,
+                                            val_avg_loss, train_avg_loss, test_avg_loss])
+
+    ## Append to CSV
     else:
         with open(f"{args.csv_output}", "a", newline='') as f:
-            csv.writer(f).writerow([args.seed, epoch, epoch_acc, epoch_loss, time.time() - epoch_time])
+            if 2 >= args.exp >= 1:
+                csv.writer(f).writerow([args.seed, epoch, train_avg_acc, train_avg_loss,
+                                        test_avg_acc, test_avg_loss, time.time() - epoch_time])
+            elif args.exp == 3:
+                csv.writer(f).writerow([args.seed, epoch, train_avg_acc, train_avg_loss, val_avg_acc,
+                                        val_avg_loss, test_avg_acc, test_avg_loss, time.time() - epoch_time])
 
 end_time = datetime.now().isoformat()
 
 if args.csv_output is None:
     client = setup_supabase_client()
-    finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time)
+    finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time, args.exp)
 
 print("Done!")
 print(f"Total time: {time.time() - epoch_start}")
