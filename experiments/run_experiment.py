@@ -22,7 +22,7 @@ parser.add_argument("--seed-file", default="seeds.txt")
 args = parser.parse_args()
 
 # Determines the root dir as the parrents parrent directory of the file,
-# because of the structure: root/experiments/run_experiment1.py
+# because of the structure: root/experiments/run_experiment.py
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 

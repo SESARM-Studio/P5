@@ -11,7 +11,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 **Windwos (PowerShell)**
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
+``
 ### 2. Restart terminal - check uv is installed:
 ``uv --version``
 

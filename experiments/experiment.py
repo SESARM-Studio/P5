@@ -13,9 +13,6 @@ from torchvision import datasets
 from torchvision.transforms import v2
 from torchvision.models import efficientnet_v2_s
 
-
-
-
 """
 Main structure is inspired by PyTorch docs:
 https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html
@@ -54,6 +51,7 @@ np.random.seed(args.seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 torch.use_deterministic_algorithms(True)
+generator = torch.Generator().manual_seed(args.seed)
 
 
 TENSOR_MEAN_CHANNELS = (0.5, 0.5, 0.5)
@@ -79,15 +77,13 @@ test_data = datasets.CIFAR10(
          v2.Normalize(TENSOR_MEAN_CHANNELS, TENSOR_STD_CHANNELS)])
 )
 
-seed = torch.Generator().manual_seed(args.seed)
-
 if args.exp == 3:
     print("Experiment: ", args.exp)
 
     training_set_size = 0.8
     validation_set_size = 0.2
     train_set, validation_set = random_split(IndexedDataset(training_data),
-                                             [training_set_size, validation_set_size], generator=seed)
+                                             [training_set_size, validation_set_size], generator=generator)
 else:
     print("Experiment: ", args.exp)
     train_set = IndexedDataset(training_data)
@@ -96,12 +92,16 @@ else:
 train_dataloader = DataLoader(train_set, batch_size=BATCH_SIZE,
                               shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
 
-validation_dataloader = DataLoader(validation_set, batch_size=BATCH_SIZE*2,
-                               shuffle=False, num_workers=NUM_WORKERS, pin_memory=True) \
-    if validation_set is not None else None
 
 test_dataloader = DataLoader(IndexedDataset(test_data), batch_size=BATCH_SIZE,
                              shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+
+# Shuffling is for preventing overfitting, and does not affect validation loss, so it's set to false for time saving
+# As backpropagation, which takes a lot of memory, is not used for validation, we can double the batch size
+# Source: https://docs.pytorch.org/tutorials/beginner/nn_tutorial.html#add-validation
+validation_dataloader = DataLoader(validation_set, batch_size=BATCH_SIZE*2,
+                               shuffle=False, num_workers=NUM_WORKERS, pin_memory=True) \
+    if validation_set is not None else None
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using {device} device")
