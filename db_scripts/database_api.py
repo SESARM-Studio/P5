@@ -94,14 +94,12 @@ def finalize_training (client, training_id, results, end_time, experiment_no):
 
         if len(response_update.data) == 1: # Supabase returns the affected rows in the .data part as a list of dictionaries
             update_result = response_update.data[0] # Supabase always returns the affected rows as list of dictionaries even if there is only 1 row.
-            if  update_result["training_id"] == training_id and update_result["end_time"] == end_time.replace(tzinfo=timezone.utc):
+            if  update_result["training_id"] == training_id:
                 success_update = True
             else:
-                print("The training ID and/or the end time does not match the row that got changed in the database")
+                print("The training ID does not match the row that got changed in the database")
                 print(f"Training ID from training: {training_id}")
                 print(f"Training ID from database: {update_result['training_id']}")
-                print(f"End time from training: {end_time.replace(tzinfo=timezone.utc)}")
-                print(f"End time from database: {update_result['end_time']}")
                 success_update = False
         else:
             print(f"{len(response_update.data)} rows got updated when only 1 should")

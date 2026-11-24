@@ -18,7 +18,7 @@ def validate_results(results):
         raise ValueError("Expected a non-empty array for results")
 
     for epoch_result in results:
-        if len(epoch_result) != 2 or len(epoch_result) != 7:
+        if len(epoch_result) != 2 and len(epoch_result) != 7:
             raise ValueError(f"Expected an array of size 2 or 7 but got {len(epoch_result)}")
         
         if type(epoch_result[0]) is not int:
