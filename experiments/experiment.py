@@ -84,10 +84,13 @@ if args.exp == 3:
     validation_set_size = 0.2
     train_set, validation_set = random_split(IndexedDataset(training_data),
                                              [training_set_size, validation_set_size], generator=generator)
-else:
+elif args.exp in [1,2]:
     print("Experiment: ", args.exp)
     train_set = IndexedDataset(training_data)
     validation_set = None
+
+else:
+    exit(f"Experiment {args.exp} is not defined")
 
 train_dataloader = DataLoader(train_set, batch_size=BATCH_SIZE,
                               shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
