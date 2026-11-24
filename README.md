@@ -37,13 +37,13 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-## How to train single model in experiment1 on AI LAB:
+## How to train single model on AI LAB:
 ```bash
 cd /ceph/project/p5_intelligent_seeds/P5/experiments
 ```
 **Change parameters in job.sh** 
 ```bash
-sbatch job.sh
+sbatch job.sh <seed> <number of epoch> <training id> <experiment number> <optional: CSV output> <optional: distribution output>
 ```
 
 ## How to run a experiment on AI LAB:
@@ -54,7 +54,7 @@ cd /ceph/project/p5_intelligent_seeds/P5/
 ```
 To run the experiment local, disconnected from the database, use the argument ```--csv-output <path_to_file>```
 and specify an output location, and ````--seed-file <path_to_file.txt>```` to specify which seeds to run, seperated by newlines
-(default is seeds.txt in same directory as run_experiment1.py)
+(default is seeds.txt in same directory as run_experiment.py)
 
 ***Afterwards: Click Ctrl + A + D***
 Should return something like: [detached from 2341069.exp0]
