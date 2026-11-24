@@ -49,5 +49,5 @@ singularity exec --nv --bind "$PROJECT_ROOT" --bind "$DATA_PATH:/data" "$CONTAIN
 	--epochs 60 \
 	--training-id "$TRAINING_ID" \
 	--exp "$EXP_NO" \
-  ${3:+--csv-output "$4"} \
-  ${4:+--dist-output "$5"}
+  ${4:+--csv-output "$4"} \
+  ${5:+--dist-output "$5"}

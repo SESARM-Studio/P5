@@ -18,13 +18,14 @@ def validate_results(results):
         raise ValueError("Expected a non-empty array for results")
 
     for epoch_result in results:
-        if len(epoch_result) != 2:
-            raise ValueError(f"Expected an array of size 2 but got {len(epoch_result)}")
+        if len(epoch_result) != 2 or len(epoch_result) != 7:
+            raise ValueError(f"Expected an array of size 2 or 7 but got {len(epoch_result)}")
         
         if type(epoch_result[0]) is not int:
             raise TypeError(f"Expected epoch to be of type int but got {type(epoch_result[0])}")
-        if type(epoch_result[1]) is not float:
-            raise TypeError(f" Expected accuracy to be of type float but got {type(epoch_result[1])}")
+        for res_type in epoch_result[1:-1]:
+            if type(res_type) is not float:
+                raise TypeError(f" Expected accuracy and loss to be of type float but got {type(epoch_result[1])}")
     return True
 
 def validate_client(client):

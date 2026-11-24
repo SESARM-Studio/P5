@@ -26,7 +26,7 @@ def initialize_training (client, seed, config_id, user_name, experiment_no):
     validate_client(client)
 
     # Check that parameters are ready to be inserted into the database
-    validate_integer(seed)
+    validate_integer(seed, "seed")
     validate_string(config_id, "config_id", allow_space_in_string=False)
     validate_string(user_name, "user_name",allow_space_in_string=True)
 
@@ -34,8 +34,9 @@ def initialize_training (client, seed, config_id, user_name, experiment_no):
     try:
         response = (
             client.table("training_run")
-            .insert({"config_id": config_id, "run_by": user_name, "seed": seed, "start_time": datetime.now().isoformat(), "experiment_no": experiment_no})
-            .select("training_id")
+            .insert({"config_id": config_id, "run_by": user_name, "seed": seed,
+                     "start_time": datetime.now().isoformat(), "experiment_no": experiment_no})
+            .select("*")
             .execute()
         )
 
