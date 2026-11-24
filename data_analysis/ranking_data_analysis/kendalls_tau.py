@@ -2,6 +2,8 @@ from math import sqrt
 
 from data_analysis.query_functions import *
 
+supabase = create_supabase_connection()
+
 EQUAL = 0
 LESS_THAN = -1
 LARGER_THAN = 1

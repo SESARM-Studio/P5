@@ -1,6 +1,6 @@
-from rbo import *
-from kendalls_tau import *
-from plots import *
+from data_analysis.ranking_data_analysis.rbo import *
+from data_analysis.ranking_data_analysis.kendalls_tau import *
+from data_analysis.ranking_data_analysis.plots import *
 
 def main():
 

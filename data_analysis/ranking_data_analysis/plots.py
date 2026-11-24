@@ -2,8 +2,8 @@ from typing import Callable
 
 import matplotlib.pyplot as plt
 
-from kendalls_tau import *
-from rbo import *
+from data_analysis.ranking_data_analysis.kendalls_tau import *
+from data_analysis.ranking_data_analysis.rbo import *
 
 
 
