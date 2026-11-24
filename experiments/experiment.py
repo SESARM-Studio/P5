@@ -227,7 +227,7 @@ end_time = datetime.now().isoformat()
 
 if args.csv_output is None:
     client = setup_supabase_client()
-    finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time)
+    finalize_training(client, args.training_id, list_of_epochs_accuracy, end_time, args.exp)
 
 print("Done!")
 print(f"Total time: {time.time() - epoch_start}")

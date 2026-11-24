@@ -22,7 +22,7 @@ def database_login(user):
 
 
 # Insert a training run with related configuration details and produce a warning if the seed is already used with that configuration
-def initialize_training (client, seed, config_id, user_name):
+def initialize_training (client, seed, config_id, user_name, experiment_no):
     validate_client(client)
 
     # Check that parameters are ready to be inserted into the database
@@ -34,7 +34,7 @@ def initialize_training (client, seed, config_id, user_name):
     try:
         response = (
             client.table("training_run")
-            .insert({"config_id": config_id, "run_by": user_name, "seed": seed, "start_time": datetime.now().isoformat()})
+            .insert({"config_id": config_id, "run_by": user_name, "seed": seed, "start_time": datetime.now().isoformat(), "experiment_no": experiment_no})
             .select("training_id")
             .execute()
         )

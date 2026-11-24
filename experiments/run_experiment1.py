@@ -70,7 +70,7 @@ def main():
         if args.csv_output:
             training_id = "local_csv"
         else:
-            training_id = initialize_training(client, seed, temp_config_id, args.uid)
+            training_id = initialize_training(client, seed, temp_config_id, args.uid, 1)
 
         subprocess.run(['sbatch',str(PROJECT_ROOT / 'experiments' / 'job.sh'), str(seed), str(training_id), EXP_NO,args.csv_output or "", args.dist_output or ""],
             cwd=PROJECT_ROOT,
