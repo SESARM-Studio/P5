@@ -236,14 +236,14 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   })
 
   # qid is the Query ID (what we are ranking)
-  df_a["qid"] = "accuracy_ranking"
-  df_b["qid"] = "accuracy_ranking"
+  df_a["qid"] = "rbo_score"
+  df_b["qid"] = "rbo_score"
 
   # score is used in order for PyTerrier to know what where each item ranks.  
   df_a["score"] = list_a_accuracies
   df_b["score"] = list_b_accuracies
 
-  return pta.rbo(df_a, df_b, p)
+  return dict(pta.rbo(df_a, df_b, p))
 
 
 
@@ -397,8 +397,7 @@ def main():
             continue
           else:
             break
-
-        print(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter))
+        rbo_score = rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter)['rbo_score']
+        print(f"Rank-Biased Overlap score: {rbo_score}")
       
-    
 main()
