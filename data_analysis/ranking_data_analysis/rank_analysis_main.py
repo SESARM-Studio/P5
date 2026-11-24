@@ -75,13 +75,22 @@ def choose_epoch_comparison_approach():
       break
   return epoch_comparison_approach
 
-def specify_epochs():
+def specify_epochs(dataset_choice):
+  epochs_no: int
+
+  match dataset_choice:
+    case 0 | 1 | 2:
+      epochs_no = 60
+    case 3:
+      epochs_no = 150
+
+  acceptable_epochs = list(range(epochs_no))
+
   while (True):
-    print("Specify two epochs in this format: 2,30")
     epoch_selection_input = str(input())
     epoch_selection = [int(epoch) for epoch in epoch_selection_input.split(',')]
 
-    if (len(epoch_selection) != 2):
+    if (len(epoch_selection) != 2 or epoch_selection[0] not in acceptable_epochs or epoch_selection[1] not in acceptable_epochs):
       continue
     else:
       break
@@ -145,24 +154,24 @@ def main():
   else: # Compare epochs rankings (3D graph or epoch specific rank comparison)
     epoch_comparison_approach = choose_epoch_comparison_approach()
 
-    if (epoch_comparison_approach == 0):
-      epoch_selection = specify_epochs()
+    if (epoch_comparison_approach == 0): # 2D plot
+      epoch_selection = specify_epochs(dataset_choice)
 
       comparison_method_choice = choose_comparison_method()
 
-      if (comparison_method_choice == 0):
+      if (comparison_method_choice == 0): # 2D plot using RBO
         persistance_parameter = choose_persistance_parameter()
 
         _, rbo_score = next(iter(rbo_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice, persistance_parameter)))
         print(f"Rank-Biased Overlap score: {rbo_score}")
       
-      else:
+      else: # 2D plot using Kendall-Tau 
         print(kendalls_tau_b_between_specific_epochs(epoch_selection[0], epoch_selection[1], dataset_choice))
 
     elif epoch_comparison_approach == 1:
       comparison_method_choice = choose_comparison_method()
 
-      if comparison_method_choice == 0:
+      if comparison_method_choice == 0: # 3D plot using RBO
         persistance_parameter = choose_persistance_parameter()
 
         print("Making 3D plot...")
@@ -171,8 +180,8 @@ def main():
           epochs=60,
           data_flag=dataset_choice,
           persistance_parameter=persistance_parameter
-        )
-      else:
+        ) 
+      else: # 3D plot using Kendall-Tau
         print("Making 3D plot...")
         threedee_plot(
           kendalls_tau_b_between_specific_epochs,
