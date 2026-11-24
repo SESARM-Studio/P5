@@ -46,11 +46,11 @@ cd /ceph/project/p5_intelligent_seeds/P5/experiments
 sbatch job.sh
 ```
 
-## How to run Experiment 0 on AI LAB:
+## How to run a experiment on AI LAB:
 ```bash
-screen -S exp0
+screen -S exp
 cd /ceph/project/p5_intelligent_seeds/P5/
-.venv-login/bin/python -m experiments.run_experiment1 --uid <Your name>
+.venv-login/bin/python -m experiments.run_experiment --uid <Your name> --exp-no <Experiment number>
 ```
 To run the experiment local, disconnected from the database, use the argument ```--csv-output <path_to_file>```
 and specify an output location, and ````--seed-file <path_to_file.txt>```` to specify which seeds to run, seperated by newlines

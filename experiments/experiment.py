@@ -82,7 +82,7 @@ test_data = datasets.CIFAR10(
 seed = torch.Generator().manual_seed(args.seed)
 
 if args.exp == 3:
-    print("Experiment three")
+    print("Experiment: ", args.exp)
 
     training_set_size = 0.8
     validation_set_size = 0.2
@@ -90,7 +90,6 @@ if args.exp == 3:
                                              [training_set_size, validation_set_size], generator=seed)
 else:
     print("Experiment: ", args.exp)
-
     train_set = IndexedDataset(training_data)
     validation_set = None
 
