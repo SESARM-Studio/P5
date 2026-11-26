@@ -4,36 +4,32 @@ import matplotlib.pyplot as plt
 
 from data_analysis.ranking_data_analysis.kendalls_tau import *
 from data_analysis.ranking_data_analysis.rbo import *
-
+from data_analysis.ranking_data_analysis.choice_enum import Choice
 
 
 EPOCHS_NO_STNDRD = 60
 EPOCHS_NO_EXPERIMENT_3 = 150
 
 
-def plot_seed_rank_positions_across_epochs(seed_rank_positions: List[List[dict]], data_flag: int):
+def plot_seed_rank_positions_across_epochs(seed_rank_positions: List[List[dict]], data_flag: Choice):
   """
   Returns a 2D array that contains the rank position of each seed for each epoch.\n
-  --------------
-  data_flag = 0 // experiment 1 data\n
-  data_flag = 1 // experiment 2 (300 new seeds) data\n
-  data_flag = 2 // experiment 2 (all 500 seeds) data\n
-  data_flag = 3 // experiment 3 data\n
   """
+  
   epochs_no: int
   seeds_no: int
 
   match data_flag:
-    case 0:
+    case Choice.EXPERIMENT_1:
       epochs_no = EPOCHS_NO_STNDRD
 
-    case 1:
+    case Choice.EXPERIMENT_2_300_SEEDS:
       epochs_no = EPOCHS_NO_STNDRD
 
-    case 2:
+    case Choice.EXPERIMENT_2_500_SEEDS:
       epochs_no = EPOCHS_NO_STNDRD
     
-    case 3:
+    case Choice.EXPERIMENT_3:
       epochs_no = EPOCHS_NO_EXPERIMENT_3
 
   # Use ranking data for epoch 0 to define number of included seed (must be the same across all epochs)
@@ -61,7 +57,7 @@ def plot_seed_rank_positions_across_epochs(seed_rank_positions: List[List[dict]]
   plt.show()
 
 
-def threedee_plot(rank_function: Callable, epochs: int, data_flag: int, persistance_parameter: float = 0.9) -> None:
+def threedee_plot(rank_function: Callable, epochs: int, data_flag: Choice, persistance_parameter: float = 0.9) -> None:
   fig = plt.figure()
   ax = fig.add_subplot(projection='3d')
 

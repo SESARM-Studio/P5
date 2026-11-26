@@ -1,6 +1,8 @@
 from math import sqrt
 
 from data_analysis.query_functions import *
+from data_analysis.ranking_data_analysis.choice_enum import Choice
+
 
 supabase = create_supabase_connection()
 
@@ -59,7 +61,7 @@ def kendalls_tau_b(list1, list2):
     return (concordant - discordant) / denominator
 
 
-def kendalls_tau_b_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int):
+def kendalls_tau_b_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: Choice):
     """
     Returns the rank-biased overlap for all seeds between two specified epochs, epoch_no_a and epoch_no_a.\n
     p is the persistance parameter used for Rank-Biased Overlap.\n
@@ -78,25 +80,25 @@ def kendalls_tau_b_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, dat
     result_epoch_data_b: any
 
     match data_flag:
-        case 0:
+        case Choice.EXPERIMENT_1:
             training_result_table_name = "training_result"
             accuracy_column_name = "accuracy"
             result_epoch_data_a = query_epoch_accuracies_experiment_1(supabase, epoch_no_a)
             result_epoch_data_b = query_epoch_accuracies_experiment_1(supabase, epoch_no_b)
 
-        case 1:
+        case Choice.EXPERIMENT_2_300_SEEDS:
             training_result_table_name = "training_result"
             accuracy_column_name = "accuracy"
             result_epoch_data_a = query_epoch_accuracies_experiment_2_300_seeds(supabase, epoch_no_a)
             result_epoch_data_b = query_epoch_accuracies_experiment_2_300_seeds(supabase, epoch_no_b)
 
-        case 2:
+        case Choice.EXPERIMENT_2_500_SEEDS:
             training_result_table_name = "training_result"
             accuracy_column_name = "accuracy"
             result_epoch_data_a = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_a)
             result_epoch_data_b = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_b)
 
-        case 3:
+        case Choice.EXPERIMENT_3:
             training_result_table_name = "training_result_convergence"
             accuracy_column_name = "validation_accuracy"
             result_epoch_data_a = query_epoch_accuracies_experiment_3(supabase, epoch_no_a)

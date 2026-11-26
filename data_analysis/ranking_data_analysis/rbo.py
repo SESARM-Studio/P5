@@ -4,6 +4,7 @@ import pandas as pd # Creation of DataFrame objects for RBO.
 import pyterrier_alpha as pta # Rank-Biased Overlap (RBO) implementation
 
 from data_analysis.query_functions import *
+from data_analysis.ranking_data_analysis.choice_enum import Choice
 
 
 supabase = create_supabase_connection()
@@ -17,14 +18,9 @@ SEEDS_NO_EXPERIMENT_3 = 200
 SEED_COLUMN_NAME = "seed"
 
 
-def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, seed_selection: List[int], accuracy_tolerance: float):
+def seed_rank_positions_across_epochs(data_flag: Choice, relative_ranking: bool, seed_selection: List[int], accuracy_tolerance: float):
   """
   Returns a 2D array that contains the rank position of each seed for each epoch.\n
-  --------------
-  data_flag = 0 // experiment 1 data\n
-  data_flag = 1 // experiment 2 (300 new seeds) data\n
-  data_flag = 2 // experiment 2 (all 500 seeds) data\n
-  data_flag = 3 // experiment 3 data\n
   --------------
   relative_ranking = True // seeds are only ranked relative to other seeds included in the analysis. Meaningful when seed_selection is non-empty.\n
   relative_ranking = False // seeds are ranked relative to all seeds in the chosen dataset\n
@@ -38,28 +34,28 @@ def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, se
   query_function: function
 
   match data_flag:
-    case 0:
+    case Choice.EXPERIMENT_1:
       epochs_no = EPOCHS_NO_STNDRD
       no_seeds = SEEDS_NO_EXPERIMENT_1
       training_result_table_name = "training_result"
       accuracy_column_name = "accuracy"
       query_function = query_epoch_accuracies_experiment_1
     
-    case 1:
+    case Choice.EXPERIMENT_2_300_SEEDS:
       epochs_no = EPOCHS_NO_STNDRD
       no_seeds = SEEDS_NO_EXPERIMENT_2_NEW
       training_result_table_name = "training_result"
       accuracy_column_name = "accuracy"
       query_function = query_epoch_accuracies_experiment_2_300_seeds
 
-    case 2:
+    case Choice.EXPERIMENT_2_500_SEEDS:
       epochs_no = EPOCHS_NO_STNDRD
       no_seeds = SEEDS_NO_EXPERIMENT_2_TOTAL
       training_result_table_name = "training_result"
       accuracy_column_name = "accuracy"
       query_function = query_epoch_accuracies_experiment_2_500_seeds
 
-    case 3:
+    case Choice.EXPERIMENT_3:
       epochs_no = EPOCHS_NO_EXPERIMENT_3
       no_seeds = SEEDS_NO_EXPERIMENT_3
       training_result_table_name = "training_result_convergence"
@@ -122,16 +118,12 @@ def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, se
   return seed_rank_positions
         
 
-def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int, p: float):
+def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: Choice, p: float):
   """
   Returns the rank-biased overlap for all seeds between two specified epochs, epoch_no_a and epoch_no_a.\n
   p is the persistance parameter used for Rank-Biased Overlap.\n
-  --------------
-  data_flag = 0 // experiment 1 data\n
-  data_flag = 1 // experiment 2 (300 new seeds) data\n
-  data_flag = 2 // experiment 2 (all 500 seeds) data\n
-  data_flag = 3 // experiment 3 data\n
-    """
+  """
+  
   SEED_COLUMN_NAME = "seed"
 
   training_result_table_name: str
@@ -145,26 +137,25 @@ def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int
   result_epoch_data_b: any
 
   match data_flag:
-    case 0:
+    case Choice.EXPERIMENT_1:
       training_result_table_name = "training_result"
       accuracy_column_name = "accuracy"
       result_epoch_data_a = query_epoch_accuracies_experiment_1(supabase, epoch_no_a)
       result_epoch_data_b = query_epoch_accuracies_experiment_1(supabase, epoch_no_b)
     
-    case 1:
+    case Choice.EXPERIMENT_2_300_SEEDS:
       training_result_table_name = "training_result"
       accuracy_column_name = "accuracy"
       result_epoch_data_a = query_epoch_accuracies_experiment_2_300_seeds(supabase, epoch_no_a)
       result_epoch_data_b = query_epoch_accuracies_experiment_2_300_seeds(supabase, epoch_no_b)
 
-    case 2:
+    case Choice.EXPERIMENT_2_500_SEEDS:
       training_result_table_name = "training_result"
       accuracy_column_name = "accuracy"
       result_epoch_data_a = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_a)
       result_epoch_data_b = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_b)
 
-
-    case 3:
+    case Choice.EXPERIMENT_3:
       training_result_table_name = "training_result_convergence"
       accuracy_column_name = "validation_accuracy"
       result_epoch_data_a = query_epoch_accuracies_experiment_3(supabase, epoch_no_a)
