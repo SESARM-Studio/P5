@@ -40,13 +40,6 @@ def query_last_training_epoch_accuracies(supabase, last_epoch):
         .execute()
     )
 
-def query_last_training_epoch_accuracies(supabase, last_epoch):
-    return (
-        supabase.table("training_result")
-        .select("accuracy")
-        .eq("epoch_no", last_epoch)
-        .execute()
-    )
 
 def query_epoch_accuracies_experiment_1(supabase, epoch):
     """
@@ -106,18 +99,3 @@ def query_epoch_accuracies_experiment_3(supabase, epoch):
         .order("seed", desc=False)
         .execute()
     )
-
-# def query_selection_test(supabase):
-#     """
-#     Returns training_id, seed, epoch_no, accuracy (testing) for seed 1-200 in experiment 1 for the specified epoch. 
-#     """
-
-#     return (
-#         supabase.from_("training_run")
-#         .select("seed, training_result(epoch_no, accuracy)")
-#         .eq("training_result.epoch_no", 32)
-#         .in_("seed", [1,2,3,7])
-#         .lt("seed", EXPERIMENT_1_SEED_UPPER_BOUND+1)
-#         .order("seed", desc=False)
-#         .execute()
-#     )
