@@ -74,3 +74,50 @@ def query_training_epoch_accuracies_experiment(supabase, epoch, experiment_no):
             data.extend(response.data[i]['training_result'])
 
         return data
+
+
+def query_training_converged_epochs(supabase, tolerance, required_consecutive_passes):
+    """
+    Function calculates, which calculate which epoch each seed of training_result_convergence converges.
+    Outputs dictionary with seed as key, and convergence epoch as value.
+    """
+    if required_consecutive_passes < 1:
+        exit("There must be at least one pass")
+
+    seeds = dict()
+    response = (
+        supabase.table("training_result_convergence")
+        .select("training_run(seed), epoch_no, validation_loss")
+        .order("training_run(seed)").order("epoch_no")
+        .execute()
+    )
+
+    for tup in response.data:
+        seed = tup["training_run"]["seed"]
+        val_loss = tup["validation_loss"]
+        seeds.setdefault(seed, []).append(val_loss)
+
+    seed_converged_epoch = dict()
+
+    for seed in seeds.keys():
+        passes = 0
+        for epoch, validation_loss in enumerate(seeds.get(seed)):
+            # Return None, if there are fewer epochs left, than required consecutive passes
+            epochs_left = len(seeds[seed]) - (epoch+1)
+            if epochs_left + passes < required_consecutive_passes:
+                seed_converged_epoch[seed] = None
+                break
+
+            # If absolute difference is greater than tolerance, go to next epoch.
+            # Else, check for consecutive passes.
+            if abs(validation_loss - seeds.get(seed)[epoch+1]) > tolerance:
+                passes = 0
+                continue
+            else:
+                passes += 1
+                if passes == required_consecutive_passes:
+                    # +1 is to get start position of 0-index
+                    seed_converged_epoch[seed] = epoch+1-required_consecutive_passes
+                    break
+
+    return seed_converged_epoch
