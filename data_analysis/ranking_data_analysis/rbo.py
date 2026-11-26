@@ -163,6 +163,7 @@ def rbo_between_specific_epochs(epoch_no_a: int, epoch_no_b: int, data_flag: int
       result_epoch_data_a = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_a)
       result_epoch_data_b = query_epoch_accuracies_experiment_2_500_seeds(supabase, epoch_no_b)
 
+
     case 3:
       training_result_table_name = "training_result_convergence"
       accuracy_column_name = "validation_accuracy"
@@ -209,4 +210,3 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   df_b["score"] = list_b_accuracies
 
   return pta.rbo(df_a, df_b, p)
-
