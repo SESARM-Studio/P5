@@ -5,6 +5,7 @@ import pyterrier_alpha as pta # Rank-Biased Overlap (RBO) implementation
 
 from data_analysis.query_functions import *
 
+
 supabase = create_supabase_connection()
 
 EPOCHS_NO_STNDRD = 60
@@ -16,7 +17,7 @@ SEEDS_NO_EXPERIMENT_3 = 200
 SEED_COLUMN_NAME = "seed"
 
 
-def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, seed_selection: List[int]):
+def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, seed_selection: List[int], accuracy_tolerance: float):
   """
   Returns a 2D array that contains the rank position of each seed for each epoch.\n
   --------------
@@ -71,7 +72,7 @@ def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, se
     epoch_ranking = []
     
     # Bring the raw data to the form:
-    # [{'seed': S, 'accuracy_name': A},...]
+    # [{'seed': S, 'accuracy': A},...]
     query_data = []
     for k in range(len(query_data_raw)):
       query_data.append({SEED_COLUMN_NAME: query_data_raw[k][SEED_COLUMN_NAME], accuracy_column_name: query_data_raw[k][training_result_table_name][0][accuracy_column_name]})
@@ -80,6 +81,22 @@ def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, se
     if relative_ranking: 
       query_data = [row for row in query_data if row['seed'] in seed_selection]
       no_seeds = len(seed_selection)
+
+    # Accuracy will remain unchanged (set to accuracy used in previous ranking) if change in ranking is below the tolerance.
+    if (i > 0):
+      for l in range(no_seeds):
+        # print("epoch: " + str(i))
+        # print("seed no: " + str(query_data[l][SEED_COLUMN_NAME]))
+        # print("current: " + str(query_data[l][accuracy_column_name]))
+        # print("prior: " + str(seed_rank_positions[i-1][l][accuracy_column_name]))
+        accuracy_delta = abs(query_data[l][accuracy_column_name] - seed_rank_positions[i-1][l][accuracy_column_name])
+        # accuracy_delta_percent = abs((query_data[l][accuracy_column_name] - seed_rank_positions[i-1][l][accuracy_column_name]) / seed_rank_positions[i-1][l][accuracy_column_name])*100
+        # print(accuracy_delta)
+            
+        if (accuracy_delta < accuracy_tolerance):
+          # print("true")
+          query_data[l][accuracy_column_name] = seed_rank_positions[i-1][l][accuracy_column_name]
+          # print(query_data[l][accuracy_column_name])
 
     # Sorts on accuracy
     query_data.sort(key=lambda row: row[accuracy_column_name], reverse = True) # reverse enforces descending order
@@ -94,7 +111,7 @@ def seed_rank_positions_across_epochs(data_flag: int, relative_ranking: bool, se
       # S3: 0.7483 : 2 (and not 3 as in none-dense ranks)
 
       rank = rank - 1 if (j > 0 and (query_data[j][accuracy_column_name] == query_data[j-1][accuracy_column_name])) else rank
-      epoch_ranking.append({SEED_COLUMN_NAME: query_data[j][SEED_COLUMN_NAME], 'rank': rank})
+      epoch_ranking.append({SEED_COLUMN_NAME: query_data[j][SEED_COLUMN_NAME], accuracy_column_name: query_data[j][accuracy_column_name], 'rank': rank})
       rank += 1
 
     # Sorts on seed in ascending order
@@ -192,3 +209,4 @@ def rbo(list_a: List[str], list_a_accuracies: List[float], list_b: List[str], li
   df_b["score"] = list_b_accuracies
 
   return pta.rbo(df_a, df_b, p)
+

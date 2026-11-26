@@ -61,6 +61,16 @@ def choose_rank_approach():
       break
   return ranking_approach_choice
 
+def specify_accuracy_tolerance():
+  while(True):
+    print("Choose an accuracy tolerance [0,inf[\n")
+    accuracy_tolerance = float(input())
+    if not (accuracy_tolerance >= 0):
+      continue
+    else:
+      break
+  return accuracy_tolerance
+
 def choose_epoch_comparison_approach():
   while(True):
     print("Choose an approach")
@@ -87,6 +97,7 @@ def specify_epochs(dataset_choice):
   acceptable_epochs = list(range(epochs_no))
 
   while (True):
+    print("Specify two epochs in this format: 42,58")
     epoch_selection_input = str(input())
     epoch_selection = [int(epoch) for epoch in epoch_selection_input.split(',')]
 
@@ -148,7 +159,9 @@ def main():
 
     ranking_approach_choice = choose_rank_approach()
 
-    seed_rank_positions = seed_rank_positions_across_epochs(dataset_choice, ranking_approach_choice, seed_selection)
+    accuracy_tolerance = specify_accuracy_tolerance()
+
+    seed_rank_positions = seed_rank_positions_across_epochs(dataset_choice, ranking_approach_choice, seed_selection, accuracy_tolerance)
     plot_seed_rank_positions_across_epochs(seed_rank_positions, dataset_choice)
 
   else: # Compare epochs rankings (3D graph or epoch specific rank comparison)
