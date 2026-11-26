@@ -15,7 +15,7 @@ PROJECT_ROOT="$SLURM_SUBMIT_DIR"
 EXPERIMENT_DIR="$PROJECT_ROOT/experiments"
 DATA_PATH="/ceph/project/p5_intelligent_seeds/data"
 MODULE="experiments.experiment"
-CONTAINER="/ceph/project/p5_intelligent_seeds/project_container.sif"
+CONTAINER="/ceph/project/p5_intelligent_seeds/P5/containers/project_container.sif"
 
 SEED="$1"
 TRAINING_ID="$2"
