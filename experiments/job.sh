@@ -14,8 +14,8 @@ set -euo pipefail
 PROJECT_ROOT="$SLURM_SUBMIT_DIR"
 EXPERIMENT_DIR="$PROJECT_ROOT/experiments"
 DATA_PATH="/ceph/project/p5_intelligent_seeds/data"
-MODULE="experiment0.experiment0"
-CONTAINER="/ceph/project/p5_intelligent_seeds/P5/containers/project_container.sif
+MODULE="experiments.experiment"
+CONTAINER="/ceph/project/p5_intelligent_seeds/P5/containers/project_container.sif"
 
 SEED="$1"
 TRAINING_ID="$2"
