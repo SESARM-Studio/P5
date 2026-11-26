@@ -64,9 +64,9 @@ def choose_rank_approach():
 
 def specify_accuracy_tolerance():
   while(True):
-    print("Choose an accuracy tolerance [0,inf[\n")
+    print("Choose an accuracy tolerance [0,1]\n")
     accuracy_tolerance = float(input())
-    if not (accuracy_tolerance >= 0):
+    if not (accuracy_tolerance <= 1 and accuracy_tolerance >= 0):
       continue
     else:
       break
@@ -90,9 +90,9 @@ def specify_epochs(dataset_choice):
   epochs_no: int
 
   match dataset_choice:
-    case 0 | 1 | 2:
+    case Choice.EXPERIMENT_1 | Choice.EXPERIMENT_2_300_SEEDS | Choice.EXPERIMENT_2_500_SEEDS:
       epochs_no = 60
-    case 3:
+    case Choice.EXPERIMENT_3:
       epochs_no = 150
 
   acceptable_epochs = list(range(epochs_no))

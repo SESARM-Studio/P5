@@ -88,3 +88,7 @@ def threedee_plot(rank_function: Callable, epochs: int, data_flag: Choice, persi
     ax.set_zlabel("RBO")
 
   plt.show()
+
+
+
+  
