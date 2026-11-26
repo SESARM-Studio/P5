@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from query_functions import *
 from scipy.stats import skewnorm
-from prompt_functions import prompt_user
+from prompt_functions import prompt_user, prompt_chose_accuracy
 
 PDF_STEPSIZE = 0.05 # The stepsize for the np.arange x-values for the pdf.
 HISTOGRAM_BINS = 20
@@ -18,12 +18,19 @@ last_epoch = max(list_epochs_no)
 
 # Prompt user for input
 experiment_choice = prompt_user(FIRST_EXPERIMENT_NO, LAST_EXPERIMENT_NO)
+accuracy_choice = prompt_chose_accuracy()
 
 # Retrieve the data from a specific experiment using our query functions from query_functions.py
 result_last_epoch_accuracies = query_training_epoch_accuracies_experiment(supabase, last_epoch, experiment_choice)
+result_best_epoch_accuracies = query_training_best_accuracies_experiment(supabase, experiment_choice)
 
-# result_last_epoch_accuracies contains a list of each row as a dictionary, this makes it into a numpy array of just the accuracies.
-list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies if "accuracy" in row])
+# result_last_epoch_accuracies or result_best_epoch_accuracies contains a list of each row as a dictionary,
+# this makes it into a numpy array of just the accuracies.
+if accuracy_choice == 1:
+    list_accuracy_data = np.array([row["accuracy"] for row in result_last_epoch_accuracies if "accuracy" in row])
+else:
+    list_accuracy_data = np.array([row["max"] for row in result_best_epoch_accuracies.data if "max" in row])
+
 list_accuracy_data *= 100 # Multiply decimal values to become percentage values
 
 min_accuracy = min(list_accuracy_data)
