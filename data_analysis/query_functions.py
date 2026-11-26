@@ -74,3 +74,16 @@ def query_training_epoch_accuracies_experiment(supabase, epoch, experiment_no):
             data.extend(response.data[i]['training_result'])
 
         return data
+
+
+def query_training_best_accuracies_experiment(supabase, experiment_no):
+    if experiment_no == CONVERGENCE_EXPERIMENT_NO:
+        exit("Best accuracy only implemented for EXP1-2 currently")
+    else:
+        response = (
+            supabase.table("exp2_max_accuracy")
+            .select("max")
+            .eq("experiment_no", experiment_no)
+            .execute()
+        )
+        return response
