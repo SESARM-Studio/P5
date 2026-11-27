@@ -185,13 +185,21 @@ def main():
     elif epoch_comparison_approach == Choice.THREEDEE_METHOD:
       comparison_method_choice = choose_comparison_method()
 
+      epochs_no: int
+
+      match dataset_choice:
+        case Choice.EXPERIMENT_1 | Choice.EXPERIMENT_2_300_SEEDS | Choice.EXPERIMENT_2_500_SEEDS:
+          epochs_no = 60
+        case Choice.EXPERIMENT_3:
+          epochs_no = 150
+
       if (comparison_method_choice == Choice.RBO): # 3D plot using RBO
         persistance_parameter = choose_persistance_parameter()
 
         print("Making 3D plot...")
         threedee_plot(
           rbo_between_specific_epochs,
-          epochs=60,
+          epochs=epochs_no,
           data_flag=dataset_choice,
           persistance_parameter=persistance_parameter
         ) 
@@ -199,7 +207,7 @@ def main():
         print("Making 3D plot...")
         threedee_plot(
           kendalls_tau_b_between_specific_epochs,
-          epochs=60,
+          epochs=epochs_no,
           data_flag=dataset_choice
         )
 
